@@ -233,7 +233,12 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                                   hintText: "Enter password",
                                   prefixIcon: const Icon(Icons.lock_outline),
                                   filled: true,
-                                  fillColor: const Color(0xFFF3F6F9),
+                                  fillColor: const Color.fromARGB(
+                                    255,
+                                    243,
+                                    246,
+                                    249,
+                                  ),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10),
                                     borderSide: BorderSide.none,
@@ -245,7 +250,12 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
 
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF1E6FA8),
+                                  backgroundColor: const Color.fromARGB(
+                                    255,
+                                    30,
+                                    111,
+                                    168,
+                                  ),
                                   foregroundColor: Colors.white,
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 14,

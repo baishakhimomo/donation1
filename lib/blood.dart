@@ -322,7 +322,7 @@ class _BloodPageState extends State<BloodPage> {
 
   @override
   Widget build(BuildContext context) {
-    // ===== Responsive sizes (same pattern as other pages) =====
+    // ===== Responsive sizes (same pattern as other pages) ==s===
     final width = MediaQuery.sizeOf(context).width;
     final double pagePad = width * 0.04;
     final double titleSize = width * 0.055;

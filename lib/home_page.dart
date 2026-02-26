@@ -13,6 +13,7 @@ import 'package:donation_app/money_don.dart';
 import 'package:donation_app/notice.dart';
 import 'package:donation_app/profile.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomePage extends StatefulWidget {
@@ -40,10 +41,14 @@ class _HomePageState extends State<HomePage> {
   // Events loaded from Supabase
   List<Map<String, dynamic>> _activeEvents = [];
 
+  // Bell icon: true when there are unseen notices
+  bool _hasUnseenNotices = false;
+
   @override
   void initState() {
     super.initState();
     _loadEvents();
+    _checkUnseenNotices();
 
     _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
       if (_pageController.hasClients) {
@@ -193,6 +198,10 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   const Spacer(),
+
+                  // Bell icon for notices
+                  _buildBellIcon(context),
+                  const SizedBox(width: 4),
 
                   //Menu Bar
                   buildMenu(context),
@@ -549,6 +558,71 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
+    );
+  }
+
+  // Check if there are notices the user hasn't seen yet
+  Future<void> _checkUnseenNotices() async {
+    try {
+      // Get all admin notice IDs from Supabase
+      final noticeRows = await Supabase.instance.client
+          .from('notices')
+          .select('id');
+      final allIds = (noticeRows as List)
+          .map((r) => r['id'].toString())
+          .toSet();
+
+      // Also get active event IDs (with 'event_' prefix to match seen-tracking keys)
+      final eventRows = await Supabase.instance.client
+          .from('events')
+          .select('id')
+          .eq('is_active', true);
+      for (final r in (eventRows as List)) {
+        allIds.add('event_${r['id']}');
+      }
+
+      // Get seen IDs from local storage
+      final prefs = await SharedPreferences.getInstance();
+      final seenIds = (prefs.getStringList('seen_notice_ids') ?? []).toSet();
+
+      // If there are IDs not yet seen, show the dot
+      final hasUnseen = allIds.difference(seenIds).isNotEmpty;
+      if (mounted) {
+        setState(() => _hasUnseenNotices = hasUnseen);
+      }
+    } catch (_) {}
+  }
+
+  // Bell icon widget with red dot
+  Widget _buildBellIcon(BuildContext context) {
+    return Stack(
+      children: [
+        IconButton(
+          icon: const Icon(Icons.notifications_outlined, size: 28),
+          onPressed: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const Notice()),
+            );
+            // After coming back, re-check unseen
+            _checkUnseenNotices();
+          },
+        ),
+        // Red dot — only visible when there are unseen notices
+        if (_hasUnseenNotices)
+          Positioned(
+            right: 8,
+            top: 8,
+            child: Container(
+              width: 10,
+              height: 10,
+              decoration: const BoxDecoration(
+                color: Colors.red,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+      ],
     );
   }
 

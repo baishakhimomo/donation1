@@ -1,7 +1,10 @@
 import "package:flutter/material.dart";
 import 'package:donation_app/admin/event_management.dart';
+import 'package:donation_app/admin/notice_manage.dart';
 import 'package:donation_app/after_join_event.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Notice extends StatefulWidget {
   const Notice({super.key});
@@ -17,8 +20,18 @@ class _NoticeState extends State<Notice> {
 
   // Events loaded from Supabase
   List<Map<String, dynamic>> _events = [];
+  // Admin-created notices from Supabase
+  List<Map<String, dynamic>> _clubNotices = [];
+  List<Map<String, dynamic>> _memberNotices = [];
+
   bool _loading = true;
   bool _isAdmin = false;
+
+  // ---- "Seen" tracking (NEW badge) ----
+  // We store IDs of notices the user has already seen in SharedPreferences.
+  Set<String> _seenNoticeIds = {};
+  // Snapshot of seen IDs BEFORE this visit (so NEW shows during current visit)
+  Set<String> _previouslySeenIds = {};
 
   // Check if current user is logged in as a member (@lussc.local email)
   bool get isMember {
@@ -34,8 +47,45 @@ class _NoticeState extends State<Notice> {
   @override
   void initState() {
     super.initState();
-    _loadEvents();
+    _loadSeenIds();
+    _loadAll();
     _checkAdmin();
+  }
+
+  // Load seen notice IDs from local storage
+  Future<void> _loadSeenIds() async {
+    final prefs = await SharedPreferences.getInstance();
+    final list = prefs.getStringList('seen_notice_ids') ?? [];
+    setState(() {
+      _seenNoticeIds = list.toSet();
+      _previouslySeenIds = list.toSet(); // snapshot before this visit
+    });
+  }
+
+  // Mark all currently visible notices + events as "seen" (for next visit)
+  Future<void> _markAllCurrentAsSeen() async {
+    bool changed = false;
+
+    // Admin notices
+    for (final n in _clubNotices) {
+      final id = n['id']?.toString() ?? '';
+      if (id.isNotEmpty && _seenNoticeIds.add(id)) changed = true;
+    }
+    for (final n in _memberNotices) {
+      final id = n['id']?.toString() ?? '';
+      if (id.isNotEmpty && _seenNoticeIds.add(id)) changed = true;
+    }
+
+    // Events (with 'event_' prefix to distinguish from admin notice IDs)
+    for (final e in _events) {
+      final id = 'event_${e['id']}';
+      if (_seenNoticeIds.add(id)) changed = true;
+    }
+
+    if (changed) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('seen_notice_ids', _seenNoticeIds.toList());
+    }
   }
 
   Future<void> _checkAdmin() async {
@@ -52,16 +102,47 @@ class _NoticeState extends State<Notice> {
     } catch (_) {}
   }
 
-  Future<void> _loadEvents() async {
+  // Load events AND admin-created notices together
+  Future<void> _loadAll() async {
     setState(() => _loading = true);
     try {
+      // Load events
       final events = await fetchActiveEvents();
+
+      // Load admin-created notices
+      final noticeRows = await Supabase.instance.client
+          .from('notices')
+          .select()
+          .order('created_at', ascending: false);
+      final notices = List<Map<String, dynamic>>.from(noticeRows as List);
+
       setState(() {
         _events = events;
+        _clubNotices = notices.where((n) => n['audience'] == 'club').toList();
+        _memberNotices = notices
+            .where((n) => n['audience'] == 'member')
+            .toList();
         _loading = false;
       });
+
+      // Mark everything as seen so next visit won't show NEW
+      _markAllCurrentAsSeen();
     } catch (_) {
       setState(() => _loading = false);
+    }
+  }
+
+  // Open a link in the browser
+  Future<void> _openLink(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Could not open $url')));
+      }
     }
   }
 
@@ -102,7 +183,7 @@ class _NoticeState extends State<Notice> {
                 ),
                 child: Row(
                   children: [
-                    Image.asset('assets/logo.png', width: 36),
+                    Image.asset('assets/logo.jpeg', width: 36),
                     const SizedBox(width: 10),
                     const Text(
                       'Notices',
@@ -112,7 +193,6 @@ class _NoticeState extends State<Notice> {
                       ),
                     ),
                     const Spacer(),
-                    IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
                   ],
                 ),
               ),
@@ -179,7 +259,7 @@ class _NoticeState extends State<Notice> {
                               onTap: () {
                                 if (canAccessMember) {
                                   setState(() {
-                                    showClub = false; // Member active
+                                    showClub = false;
                                   });
                                 } else {
                                   showDialog(
@@ -188,7 +268,7 @@ class _NoticeState extends State<Notice> {
                                       title: const Text("Members Notices"),
                                       content: const Text(
                                         "Please login as a member to access this section.",
-                                      ), //member na hole ei option dekhabe
+                                      ),
                                       actions: [
                                         TextButton(
                                           onPressed: () {
@@ -207,8 +287,7 @@ class _NoticeState extends State<Notice> {
                                 ),
                                 decoration: BoxDecoration(
                                   color: !showClub && canAccessMember
-                                      ? Colors
-                                            .blue // Active hole blue dekhabe
+                                      ? Colors.blue
                                       : Colors.transparent,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
@@ -261,11 +340,12 @@ class _NoticeState extends State<Notice> {
     );
   }
 
-  // Club Notices — show active events from Supabase
+  // ======================== Club Notices ========================
   Widget clubNotices() {
     final events = _events;
+    final adminNotices = _clubNotices;
 
-    if (events.isEmpty) {
+    if (events.isEmpty && adminNotices.isEmpty) {
       return const Center(
         child: Text(
           'No notices yet.',
@@ -274,22 +354,35 @@ class _NoticeState extends State<Notice> {
       );
     }
 
+    // Total items: admin notices first, then events
+    final totalCount = adminNotices.length + events.length;
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: events.length,
+      itemCount: totalCount,
       itemBuilder: (context, index) {
-        final event = events[index];
+        // Admin-created notices come first
+        if (index < adminNotices.length) {
+          final n = adminNotices[index];
+          return _adminNoticeCard(notice: n, index: index, isClub: true);
+        }
+
+        // Then event-based notices
+        final eventIndex = index - adminNotices.length;
+        final event = events[eventIndex];
         final String title = event['title'] as String? ?? '';
         final String date = event['date'] as String? ?? '';
         final String time = event['timeDisplay'] as String? ?? '';
-        final String location = event['location'] as String? ?? '';
         final String description = event['description'] as String? ?? '';
         final String status = event['status'] as String? ?? 'Active';
         final String notice = event['notice'] as String? ?? '';
 
-        // Tag color based on status
         final Color tagColor = status == 'Active' ? Colors.green : Colors.red;
         final String tag = status == 'Active' ? 'EVENT' : 'CLOSED';
+
+        // Check if user has seen this event notice before
+        final eventSeenKey = 'event_${event['id']}';
+        final bool isNewEvent = !_previouslySeenIds.contains(eventSeenKey);
 
         return noticeCard(
           index: index,
@@ -300,17 +393,18 @@ class _NoticeState extends State<Notice> {
           fullDescription: description,
           date: date,
           time: time.isNotEmpty ? time : null,
-          isNew: status == 'Active',
+          isNew: isNewEvent,
         );
       },
     );
   }
 
-  // Members Notices — show active events from Supabase, with Join button
+  // ======================== Members Notices ========================
   Widget memberNotices() {
     final events = _events;
+    final adminNotices = _memberNotices;
 
-    if (events.isEmpty) {
+    if (events.isEmpty && adminNotices.isEmpty) {
       return const Center(
         child: Text(
           'No member notices yet.',
@@ -319,11 +413,21 @@ class _NoticeState extends State<Notice> {
       );
     }
 
+    final totalCount = adminNotices.length + events.length;
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: events.length,
+      itemCount: totalCount,
       itemBuilder: (context, index) {
-        final event = events[index];
+        // Admin-created member notices first
+        if (index < adminNotices.length) {
+          final n = adminNotices[index];
+          return _adminNoticeCard(notice: n, index: index, isClub: false);
+        }
+
+        // Then event-based notices
+        final eventIndex = index - adminNotices.length;
+        final event = events[eventIndex];
         final String title = event['title'] as String? ?? '';
         final String date = event['date'] as String? ?? '';
         final String time = event['timeDisplay'] as String? ?? '';
@@ -333,6 +437,10 @@ class _NoticeState extends State<Notice> {
 
         final Color tagColor = status == 'Active' ? Colors.green : Colors.red;
         final String tag = status == 'Active' ? 'EVENT' : 'CLOSED';
+
+        // Check if user has seen this event notice before
+        final eventSeenKey = 'event_${event['id']}';
+        final bool isNewEvent = !_previouslySeenIds.contains(eventSeenKey);
 
         return memberNoticeCard(
           event: event,
@@ -344,13 +452,13 @@ class _NoticeState extends State<Notice> {
           fullDescription: description,
           date: date,
           time: time.isNotEmpty ? time : null,
-          isNew: status == 'Active',
+          isNew: isNewEvent,
         );
       },
     );
   }
 
-  // Reusable Notice Card
+  // ======================== Event Notice Card (club tab) ========================
   Widget noticeCard({
     required int index,
     required String tag,
@@ -426,54 +534,64 @@ class _NoticeState extends State<Notice> {
 
           const SizedBox(height: 6),
 
-          Text(
-            isExpanded && fullDescription.isNotEmpty
-                ? fullDescription
-                : description,
-            style: const TextStyle(color: Colors.black54),
-          ),
-
-          const SizedBox(height: 12),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
+          // ---- Description (truncated if long) ----
+          Builder(
+            builder: (_) {
+              final fullText = fullDescription.isNotEmpty
+                  ? fullDescription
+                  : description;
+              final isLong =
+                  description.length > 100 ||
+                  fullText.length > description.length;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.calendar_today, size: 16),
-                  const SizedBox(width: 6),
-                  Text(time == null ? date : "$date . $time"),
-                ],
-              ),
-
-              // CLICKABLE READ MORE
-              if (fullDescription.isNotEmpty)
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      if (isExpanded) {
-                        _clubExpandedIndex = -1;
-                      } else {
-                        _clubExpandedIndex = index;
-                      }
-                    });
-                  },
-                  child: Text(
-                    isExpanded ? "Read less ←" : "Read more →",
-                    style: const TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  Text(
+                    isExpanded
+                        ? fullText
+                        : (description.length > 100
+                              ? '${description.substring(0, 100)}...'
+                              : description),
+                    style: const TextStyle(color: Colors.black54),
                   ),
-                ),
-            ],
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.calendar_today, size: 16),
+                          const SizedBox(width: 6),
+                          Text(time == null ? date : "$date · $time"),
+                        ],
+                      ),
+                      if (isLong)
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _clubExpandedIndex = isExpanded ? -1 : index;
+                            });
+                          },
+                          child: Text(
+                            isExpanded ? "Read less ←" : "Read more →",
+                            style: const TextStyle(
+                              color: Colors.blue,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),
     );
   }
 
-  // Member Notice Card — same as noticeCard but with a Join button
+  // ======================== Event Notice Card (member tab) ========================
   Widget memberNoticeCard({
     required Map<String, dynamic> event,
     required int index,
@@ -551,48 +669,69 @@ class _NoticeState extends State<Notice> {
 
           const SizedBox(height: 6),
 
-          Text(
-            isExpanded && fullDescription.isNotEmpty
-                ? fullDescription
-                : description,
-            style: const TextStyle(color: Colors.black54),
+          // ---- Description (truncated if long) ----
+          Builder(
+            builder: (_) {
+              final fullText = fullDescription.isNotEmpty
+                  ? fullDescription
+                  : description;
+              final isLong =
+                  description.length > 100 ||
+                  fullText.length > description.length;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isExpanded
+                        ? fullText
+                        : (description.length > 100
+                              ? '${description.substring(0, 100)}...'
+                              : description),
+                    style: const TextStyle(color: Colors.black54),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Icon(Icons.calendar_today, size: 16),
+                      const SizedBox(width: 6),
+                      Text(time == null ? date : "$date · $time"),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              );
+            },
           ),
-
-          const SizedBox(height: 12),
-
-          Row(
-            children: [
-              const Icon(Icons.calendar_today, size: 16),
-              const SizedBox(width: 6),
-              Text(time == null ? date : "$date . $time"),
-            ],
-          ),
-
-          const SizedBox(height: 12),
 
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Read more
-              if (fullDescription.isNotEmpty)
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      if (isExpanded) {
-                        _memberExpandedIndex = -1;
-                      } else {
-                        _memberExpandedIndex = index;
-                      }
-                    });
-                  },
-                  child: Text(
-                    isExpanded ? "Read less ←" : "Read more →",
-                    style: const TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.w600,
+              Builder(
+                builder: (_) {
+                  final fullText = fullDescription.isNotEmpty
+                      ? fullDescription
+                      : description;
+                  final isLong =
+                      description.length > 100 ||
+                      fullText.length > description.length;
+                  if (!isLong) return const SizedBox.shrink();
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _memberExpandedIndex = isExpanded ? -1 : index;
+                      });
+                    },
+                    child: Text(
+                      isExpanded ? "Read less ←" : "Read more →",
+                      style: const TextStyle(
+                        color: Colors.blue,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
+              ),
 
               // Join button — only for active events
               if (status == 'Active')
@@ -613,6 +752,228 @@ class _NoticeState extends State<Notice> {
                     ),
                   ),
                   child: const Text('Join'),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _adminNoticeCard({
+    required Map<String, dynamic> notice,
+    required int index,
+    required bool isClub,
+  }) {
+    final noticeId = notice['id'] as String? ?? '';
+    final title = notice['title'] as String? ?? '';
+    final body = notice['body'] as String? ?? '';
+    final link = notice['link'] as String? ?? '';
+    final location = notice['location'] as String? ?? '';
+    final createdAt = notice['created_at'] as String? ?? '';
+    final noticeDate = notice['notice_date'] as String? ?? '';
+    final noticeTime = notice['notice_time'] as String? ?? '';
+
+    // Get the notice type info (color, icon, label)
+    final nType = getNoticeType(notice['notice_type'] as String?);
+
+    // Use the correct expanded index based on tab
+    final expandedIdx = isClub ? _clubExpandedIndex : _memberExpandedIndex;
+    final isExpanded = expandedIdx == index;
+
+    // Check if user has already seen this notice (before this visit)
+    final bool isNew = !_previouslySeenIds.contains(noticeId);
+
+    // Format date
+    String dateText = '';
+    if (createdAt.isNotEmpty) {
+      final dt = DateTime.tryParse(createdAt);
+      if (dt != null) {
+        final local = dt.toLocal();
+        dateText = '${local.day}/${local.month}/${local.year}';
+      }
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(20),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ---- Tag row: notice type + NEW badge ----
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Dynamic notice type tag (Meeting / Blood Urgent / etc.)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  color: nType.color,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(nType.icon, size: 14, color: Colors.white),
+                    const SizedBox(width: 4),
+                    Text(
+                      nType.label.toUpperCase(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // NEW badge — only shows if user hasn't seen it yet
+              if (isNew)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.orange,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    "NEW",
+                    style: TextStyle(color: Colors.white, fontSize: 11),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+
+          // ---- Title ----
+          Text(
+            title,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 6),
+
+          // ---- Body (with Read more toggle) ----
+          Text(
+            isExpanded
+                ? body
+                : (body.length > 100 ? '${body.substring(0, 100)}...' : body),
+            style: const TextStyle(color: Colors.black54),
+          ),
+
+          // ---- Location (if provided) ----
+          if (location.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(
+                  Icons.location_on,
+                  size: 16,
+                  color: Colors.redAccent,
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    location,
+                    style: const TextStyle(color: Colors.black87, fontSize: 13),
+                  ),
+                ),
+              ],
+            ),
+          ],
+
+          // ---- Link button ----
+          if (link.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: () => _openLink(link),
+              child: Row(
+                children: [
+                  const Icon(Icons.link, size: 16, color: Colors.blue),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      link,
+                      style: const TextStyle(
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
+          // ---- Notice Date & Time (if set by admin) ----
+          if (noticeDate.isNotEmpty || noticeTime.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.event, size: 16, color: Colors.indigo),
+                const SizedBox(width: 4),
+                Text(
+                  [
+                    noticeDate,
+                    noticeTime,
+                  ].where((s) => s.isNotEmpty).join(' · '),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Colors.indigo,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ],
+
+          const SizedBox(height: 12),
+
+          // ---- Date + Read more ----
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.calendar_today, size: 16),
+                  const SizedBox(width: 6),
+                  Text(dateText),
+                ],
+              ),
+              if (body.length > 100)
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      if (isClub) {
+                        _clubExpandedIndex = isExpanded ? -1 : index;
+                      } else {
+                        _memberExpandedIndex = isExpanded ? -1 : index;
+                      }
+                    });
+                  },
+                  child: Text(
+                    isExpanded ? "Read less ←" : "Read more →",
+                    style: const TextStyle(
+                      color: Colors.blue,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
             ],
           ),

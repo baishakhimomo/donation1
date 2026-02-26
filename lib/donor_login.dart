@@ -140,12 +140,17 @@ class _DonorLoginState extends State<DonorLogin> {
                           },
                           icon: const Icon(
                             Icons.admin_panel_settings,
-                            color: Color(0xFF1E6FA8),
+                            color: Color.fromARGB(255, 30, 111, 168),
                           ),
                         ),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(255, 242, 107, 107),
+                            backgroundColor: const Color.fromARGB(
+                              255,
+                              242,
+                              107,
+                              107,
+                            ),
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
@@ -160,7 +165,7 @@ class _DonorLoginState extends State<DonorLogin> {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const AdminApprovalPage(),
+                                builder: (_) => const HomePage(),
                               ),
                             );
                           },

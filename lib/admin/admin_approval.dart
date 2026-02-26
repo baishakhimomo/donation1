@@ -1,4 +1,5 @@
 import 'package:donation_app/admin/event_management.dart';
+import 'package:donation_app/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -296,14 +297,37 @@ class _AdminApprovalPageState extends State<AdminApprovalPage> {
                 IconButton(
                   onPressed: () => Navigator.push(
                     context,
+                    MaterialPageRoute(builder: (context) => const HomePage()),
+                  ),
+                  icon: const Icon(Icons.home),
+                  color: Colors.white,
+                ),
+                const Text(
+                  "Home",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  onPressed: () => Navigator.push(
+                    context,
                     MaterialPageRoute(
                       builder: (context) => EventManagementPage(),
                     ),
                   ),
-                  icon: Icon(Icons.receipt_long),
+                  icon: const Icon(Icons.receipt_long),
                   color: Colors.white,
                 ),
-                Text(
+                const Text(
                   "Events",
                   style: TextStyle(
                     color: Colors.white,

@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:donation_app/admin/event_management.dart';
+import 'package:donation_app/food_page.dart';
+import 'package:donation_app/cloth_page.dart';
+import 'package:donation_app/money_don.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 typedef EventUpdateCallback = void Function(Map<String, dynamic> updatedEvent);
 
@@ -114,6 +119,7 @@ class _AfterJoinEventPageState extends State<AfterJoinEventPage> {
       return;
     }
 
+    // Update local state
     setState(() {
       _event['title'] = updatedTitle;
       _event['date'] = updatedDate;
@@ -123,27 +129,79 @@ class _AfterJoinEventPageState extends State<AfterJoinEventPage> {
       _event['notice'] = updatedNotice;
     });
 
+    // Save to Supabase if event has an id
+    final eventId = _event['id'] as String?;
+    if (eventId != null) {
+      try {
+        await Supabase.instance.client
+            .from('events')
+            .update({
+              'title': updatedTitle,
+              'event_date': toIsoDate(updatedDate),
+              'event_time': updatedTime,
+              'location': updatedLocation,
+              'description': updatedDescription,
+              'notice_text': updatedNotice,
+            })
+            .eq('id', eventId);
+      } catch (_) {}
+    }
+
     _notifyUpdate();
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Event details updated.')));
+    if (mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Event details updated.')));
+    }
   }
 
-  void _toggleStatus() {
+  Future<void> _toggleStatus() async {
+    final current = (_event['status'] as String?) ?? 'Active';
+    final newStatus = current == 'Active' ? 'Closed' : 'Active';
+
     setState(() {
-      final current = (_event['status'] as String?) ?? 'Active';
-      _event['status'] = current == 'Active' ? 'Closed' : 'Active';
+      _event['status'] = newStatus;
     });
+
+    // Save to Supabase
+    final eventId = _event['id'] as String?;
+    if (eventId != null) {
+      try {
+        await Supabase.instance.client
+            .from('events')
+            .update({'is_active': newStatus == 'Active'})
+            .eq('id', eventId);
+      } catch (_) {}
+    }
 
     _notifyUpdate();
 
-    final isActive = (_event['status'] as String?) == 'Active';
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(isActive ? 'Event reopened.' : 'Event closed.')),
-    );
+    final isActive = newStatus == 'Active';
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(isActive ? 'Event reopened.' : 'Event closed.')),
+      );
+    }
   }
 
   bool get _isActive => ((_event['status'] as String?) ?? 'Active') == 'Active';
+
+  // Navigate to the matching donation page based on action title
+  void _onActionTap(String title) {
+    final lower = title.toLowerCase();
+    Widget? page;
+    if (lower.contains('food')) {
+      page = const FoodPage();
+    } else if (lower.contains('cloth')) {
+      page = const ClothDonation();
+    } else if (lower.contains('money')) {
+      page = const MoneyDonationPage();
+    }
+
+    if (page != null) {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => page!));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -331,66 +389,76 @@ class _AfterJoinEventPageState extends State<AfterJoinEventPage> {
                         ...actions.map((action) {
                           final Color actionColor =
                               action['color'] as Color? ?? Colors.green;
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withAlpha(20),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 50,
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    color: actionColor.withAlpha(220),
-                                    borderRadius: BorderRadius.circular(14),
+                          final String actionTitle =
+                              action['title'] as String? ?? '';
+                          return GestureDetector(
+                            onTap: () => _onActionTap(actionTitle),
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withAlpha(20),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 4),
                                   ),
-                                  child: Icon(
-                                    action['icon'] as IconData? ?? Icons.help,
-                                    color: Colors.white,
+                                ],
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 50,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      color: actionColor.withAlpha(220),
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    child: Icon(
+                                      action['icon'] as IconData? ?? Icons.help,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        action['title'] as String? ?? '',
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          action['title'] as String? ?? '',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        action['subtitle'] as String? ?? '',
-                                        style: const TextStyle(
-                                          color: Colors.black54,
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          action['subtitle'] as String? ?? '',
+                                          style: const TextStyle(
+                                            color: Colors.black54,
+                                          ),
                                         ),
+                                      ],
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () => _onActionTap(actionTitle),
+                                    child: CircleAvatar(
+                                      backgroundColor: actionColor.withAlpha(
+                                        220,
                                       ),
-                                    ],
+                                      child: const Icon(
+                                        Icons.arrow_forward_ios,
+                                        color: Colors.white,
+                                        size: 16,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                CircleAvatar(
-                                  backgroundColor: actionColor.withAlpha(220),
-                                  child: const Icon(
-                                    Icons.arrow_forward_ios,
-                                    color: Colors.white,
-                                    size: 16,
-                                  ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           );
                         }),

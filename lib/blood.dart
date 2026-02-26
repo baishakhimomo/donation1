@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class BloodPage extends StatefulWidget {
   const BloodPage({super.key});
@@ -15,17 +17,18 @@ class _BloodPageState extends State<BloodPage> {
   final _addressController = TextEditingController();
   final _searchController = TextEditingController();
 
-  // Local UI state
-  bool _hasSubmitted = false;
+  // State
   String _selectedBloodFilter = 'All';
   String _searchQuery = '';
+  bool _loading = true;
+  bool _isAdmin = false;
 
-  String _myEntryKey = '';
+  // Donors loaded from Supabase
+  List<Map<String, dynamic>> _donors = [];
 
-  // In-memory donor list (replace with backend later)
-  final List<Map<String, String>> _donors = [];
+  // Current user id (null if not logged in)
+  String? _userId;
 
-  // Filter options
   final List<String> _bloodGroups = [
     'All',
     'A+',
@@ -38,71 +41,110 @@ class _BloodPageState extends State<BloodPage> {
     'AB-',
   ];
 
-  Future<void> pickBloodGroup() async {
-    // Bottom-sheet picker for blood group
-    String? selected = await showModalBottomSheet<String>(
+  @override
+  void initState() {
+    super.initState();
+    _initUser();
+    _loadDonors();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _bloodController.dispose();
+    _phoneController.dispose();
+    _addressController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  // Get logged-in user info and check admin
+  void _initUser() {
+    final session = Supabase.instance.client.auth.currentSession;
+    if (session != null) {
+      _userId = session.user.id;
+      _checkAdmin(session.user.email ?? '');
+    }
+  }
+
+  Future<void> _checkAdmin(String email) async {
+    try {
+      final row = await Supabase.instance.client
+          .from('admin_emails')
+          .select()
+          .eq('email', email)
+          .maybeSingle();
+      if (mounted) setState(() => _isAdmin = row != null);
+    } catch (_) {}
+  }
+
+  // Load all donors from Supabase
+  Future<void> _loadDonors() async {
+    setState(() => _loading = true);
+    try {
+      final rows = await Supabase.instance.client
+          .from('blood_donors')
+          .select()
+          .order('name', ascending: true);
+      setState(() {
+        _donors = List<Map<String, dynamic>>.from(rows as List);
+        _loading = false;
+      });
+    } catch (_) {
+      setState(() => _loading = false);
+    }
+  }
+
+  // Check if current user already has a registration
+  bool get _hasMyEntry {
+    if (_userId == null) return false;
+    return _donors.any((d) => d['user_id'] == _userId);
+  }
+
+  // Blood group picker bottom sheet
+  Future<void> _pickBloodGroup() async {
+    final selected = await showModalBottomSheet<String>(
       context: context,
       builder: (context) {
         return Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: const Text('A+'),
-              onTap: () => Navigator.pop(context, 'A+'),
-            ),
-            ListTile(
-              title: const Text('A-'),
-              onTap: () => Navigator.pop(context, 'A-'),
-            ),
-            ListTile(
-              title: const Text('B+'),
-              onTap: () => Navigator.pop(context, 'B+'),
-            ),
-            ListTile(
-              title: const Text('B-'),
-              onTap: () => Navigator.pop(context, 'B-'),
-            ),
-            ListTile(
-              title: const Text('O+'),
-              onTap: () => Navigator.pop(context, 'O+'),
-            ),
-            ListTile(
-              title: const Text('O-'),
-              onTap: () => Navigator.pop(context, 'O-'),
-            ),
-            ListTile(
-              title: const Text('AB+'),
-              onTap: () => Navigator.pop(context, 'AB+'),
-            ),
-            ListTile(
-              title: const Text('AB-'),
-              onTap: () => Navigator.pop(context, 'AB-'),
-            ),
-          ],
+          children: ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'].map((g) {
+            return ListTile(
+              title: Text(g),
+              onTap: () => Navigator.pop(context, g),
+            );
+          }).toList(),
         );
       },
     );
-
     if (selected != null) {
-      setState(() {
-        _bloodController.text = selected;
-      });
+      setState(() => _bloodController.text = selected);
     }
   }
 
-  void _handleRequest(String phone) {
-    // Request action (call later via url_launcher)
-    // TODO: Later
-    // 1) Add url_launcher to pubspec.yaml
-    // 2) import 'package:url_launcher/url_launcher.dart';
-    // 3) call launchUrl(Uri.parse('tel:$phone')) here
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Call $phone')));
-  }
+  // Submit new donor registration
+  Future<void> _submitDonor() async {
+    // Must be logged in
+    if (_userId == null) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Login Required'),
+          content: const Text(
+            'Please log in as a donor or member to register.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
 
-  void _submitDonor() {
-    // Validate and add a donor entry
+    // Validate fields
     if (_nameController.text.trim().isEmpty ||
         _bloodController.text.trim().isEmpty ||
         _phoneController.text.trim().isEmpty ||
@@ -113,393 +155,393 @@ class _BloodPageState extends State<BloodPage> {
       return;
     }
 
-    if (_hasSubmitted) {
+    // One registration per account (admin can add more)
+    if (!_isAdmin && _hasMyEntry) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('You can register only once.')),
       );
       return;
     }
 
-    final name = _nameController.text.trim();
-    final blood = _bloodController.text.trim();
-    final address = _addressController.text.trim();
-    final phone = _phoneController.text.trim();
-    final entryKey = '${name.toLowerCase()}|${phone.toLowerCase()}';
-
-    setState(() {
-      _donors.add({
-        'name': name,
-        'blood': blood,
-        'address': address,
-        'phone': phone,
+    try {
+      await Supabase.instance.client.from('blood_donors').insert({
+        'user_id': _userId,
+        'name': _nameController.text.trim(),
+        'blood_group': _bloodController.text.trim(),
+        'phone': _phoneController.text.trim(),
+        'address': _addressController.text.trim(),
       });
-      _hasSubmitted = true;
-      _myEntryKey = entryKey;
+
       _nameController.clear();
       _bloodController.clear();
       _phoneController.clear();
       _addressController.clear();
-    });
-  }
 
-  void _startEdit(Map<String, String> donor) {
-    _nameController.text = donor['name'] ?? '';
-    _bloodController.text = donor['blood'] ?? '';
-    _phoneController.text = donor['phone'] ?? '';
-    _addressController.text = donor['address'] ?? '';
-  }
+      await _loadDonors();
 
-  void _updateMyEntry(Map<String, String> donor) {
-    if (_nameController.text.trim().isEmpty ||
-        _bloodController.text.trim().isEmpty ||
-        _phoneController.text.trim().isEmpty ||
-        _addressController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please fill all fields.')));
-      return;
-    }
-
-    final name = _nameController.text.trim();
-    final blood = _bloodController.text.trim();
-    final address = _addressController.text.trim();
-    final phone = _phoneController.text.trim();
-    final newKey = '${name.toLowerCase()}|${phone.toLowerCase()}';
-
-    setState(() {
-      final index = _donors.indexOf(donor);
-      if (index != -1) {
-        _donors[index] = {
-          'name': name,
-          'blood': blood,
-          'address': address,
-          'phone': phone,
-        };
-        _myEntryKey = newKey;
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registered successfully!')),
+        );
       }
-      _nameController.clear();
-      _bloodController.clear();
-      _phoneController.clear();
-      _addressController.clear();
-    });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    }
   }
 
-  void _deleteMyEntry(Map<String, String> donor) {
-    setState(() {
-      _donors.remove(donor);
-      _hasSubmitted = false;
-      _myEntryKey = '';
-    });
+  // Edit donor entry via dialog
+  Future<void> _editEntry(Map<String, dynamic> donor) async {
+    final nameCtrl = TextEditingController(text: donor['name'] ?? '');
+    final bloodCtrl = TextEditingController(text: donor['blood_group'] ?? '');
+    final phoneCtrl = TextEditingController(text: donor['phone'] ?? '');
+    final addressCtrl = TextEditingController(text: donor['address'] ?? '');
+
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Entry'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameCtrl,
+                decoration: const InputDecoration(labelText: 'Full Name'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: bloodCtrl,
+                readOnly: true,
+                decoration: const InputDecoration(labelText: 'Blood Group'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: phoneCtrl,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(labelText: 'Phone'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: addressCtrl,
+                decoration: const InputDecoration(labelText: 'Address'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    // Capture values before disposing
+    final updatedName = nameCtrl.text.trim();
+    final updatedBlood = bloodCtrl.text.trim();
+    final updatedPhone = phoneCtrl.text.trim();
+    final updatedAddress = addressCtrl.text.trim();
+
+    nameCtrl.dispose();
+    bloodCtrl.dispose();
+    phoneCtrl.dispose();
+    addressCtrl.dispose();
+
+    if (saved != true) return;
+
+    final id = donor['id'] as String?;
+    if (id == null) return;
+
+    try {
+      await Supabase.instance.client
+          .from('blood_donors')
+          .update({
+            'name': updatedName,
+            'blood_group': updatedBlood,
+            'phone': updatedPhone,
+            'address': updatedAddress,
+          })
+          .eq('id', id);
+      await _loadDonors();
+    } catch (_) {}
+  }
+
+  // Delete a donor entry
+  Future<void> _deleteEntry(Map<String, dynamic> donor) async {
+    final id = donor['id'] as String?;
+    if (id == null) return;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Entry?'),
+        content: Text('Remove ${donor['name']}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      await Supabase.instance.client.from('blood_donors').delete().eq('id', id);
+      await _loadDonors();
+    } catch (_) {}
+  }
+
+  Future<void> _handleRequest(String phone) async {
+    // Build a tel: URI and launch the phone dialer
+    final uri = Uri.parse('tel:$phone');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Could not call $phone')));
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final isWide = size.width >= 720;
-    final contentWidth = size.width > 900 ? 900.0 : size.width;
-    final fieldWidth = isWide ? (contentWidth - 16) / 2 : contentWidth;
-    // Sort + filter donors for display
-    final donors = List<Map<String, String>>.from(_donors)
-      ..sort((a, b) => a['name']!.compareTo(b['name']!));
-    final filteredDonors = donors.where((donor) {
-      final matchesBlood =
+    // ===== Responsive sizes (same pattern as other pages) =====
+    final width = MediaQuery.sizeOf(context).width;
+    final double pagePad = width * 0.04;
+    final double titleSize = width * 0.055;
+    final double bodySize = width * 0.037;
+    final double smallSize = width * 0.032;
+    final double headerHeight = width * 0.15;
+
+    // Filter donors for display
+    final filtered = _donors.where((d) {
+      final matchBlood =
           _selectedBloodFilter == 'All' ||
-          donor['blood'] == _selectedBloodFilter;
-      final name = donor['name'] ?? '';
-      final matchesSearch =
-          _searchQuery.isEmpty || name.toLowerCase().contains(_searchQuery);
-      return matchesBlood && matchesSearch;
+          d['blood_group'] == _selectedBloodFilter;
+      final name = (d['name'] ?? '').toString().toLowerCase();
+      final matchSearch = _searchQuery.isEmpty || name.contains(_searchQuery);
+      return matchBlood && matchSearch;
     }).toList();
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        scrolledUnderElevation: 0,
-        title: Row(
-          children: [
-            const SizedBox(width: 15),
-            Image.asset('assets/logo.jpeg', width: 30, height: 30),
-            const SizedBox(width: 8),
-            const Text(
-              'DONATE BLOOD, SAVE LIVES',
-              style: TextStyle(
-                color: Color.fromARGB(255, 78, 91, 106),
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
       body: Stack(
         children: [
           // Background
           Positioned.fill(
             child: Image.asset('assets/backg.png', fit: BoxFit.cover),
           ),
-          SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 900),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Donor registration section
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withAlpha(220),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withAlpha(40),
-                            blurRadius: 14,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
+
+          SafeArea(
+            child: Column(
+              children: [
+                // ===== HEADER =====
+                Container(
+                  height: headerHeight,
+                  margin: EdgeInsets.only(
+                    top: pagePad,
+                    left: pagePad,
+                    right: pagePad,
+                  ),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: pagePad * 0.6,
+                    vertical: pagePad * 0.5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(30),
+                        blurRadius: 12,
+                        offset: const Offset(0, 6),
                       ),
-                      child: Stack(
-                        children: [
-                          // Logo watermark
-                          Center(
-                            child: Opacity(
-                              opacity: 0.08,
-                              child: Image.asset(
-                                'assets/logo.jpeg',
-                                width: 250,
-                              ),
-                            ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.arrow_back),
+                      ),
+                      Image.asset('assets/logo.jpeg', width: width * 0.08),
+                      SizedBox(width: pagePad * 0.4),
+                      Expanded(
+                        child: Text(
+                          'DONATE BLOOD',
+                          style: TextStyle(
+                            fontSize: titleSize,
+                            fontWeight: FontWeight.bold,
+                            color: const Color.fromARGB(255, 78, 91, 106),
                           ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // ===== BODY =====
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.all(pagePad),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // ===== REGISTRATION FORM =====
+                        Container(
+                          padding: EdgeInsets.all(pagePad),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withAlpha(220),
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withAlpha(40),
+                                blurRadius: 14,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: Stack(
                             children: [
-                              // Section header
-                              const Text(
-                                'Register as a Blood Donor',
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color.fromARGB(255, 72, 131, 198),
+                              // Logo watermark
+                              Center(
+                                child: Opacity(
+                                  opacity: 0.08,
+                                  child: Image.asset(
+                                    'assets/logo.jpeg',
+                                    width: width * 0.5,
+                                  ),
                                 ),
                               ),
-                              const SizedBox(height: 6),
-                              const Text(
-                                'Fill the form below to help those in need.',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Color.fromARGB(255, 120, 120, 120),
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              // Form fields
-                              Wrap(
-                                spacing: 16,
-                                runSpacing: 16,
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  Text(
+                                    'Register as a Blood Donor',
+                                    style: TextStyle(
+                                      fontSize: titleSize,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color.fromARGB(
+                                        255,
+                                        72,
+                                        131,
+                                        198,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: pagePad * 0.4),
+                                  Text(
+                                    'Fill the form below to help those in need.',
+                                    style: TextStyle(
+                                      fontSize: smallSize,
+                                      color: Colors.black54,
+                                    ),
+                                  ),
+                                  SizedBox(height: pagePad),
+
+                                  // Form fields
+                                  _buildField(
+                                    _nameController,
+                                    'Full Name',
+                                    'Enter full name',
+                                    bodySize,
+                                  ),
+                                  SizedBox(height: pagePad * 0.7),
+                                  _buildField(
+                                    _bloodController,
+                                    'Blood Group',
+                                    'Select blood group',
+                                    bodySize,
+                                    readOnly: true,
+                                    onTap: _pickBloodGroup,
+                                    suffixIcon: Icons.arrow_drop_down,
+                                  ),
+                                  SizedBox(height: pagePad * 0.7),
+                                  _buildField(
+                                    _phoneController,
+                                    'Phone Number',
+                                    'Enter phone number',
+                                    bodySize,
+                                    keyboard: TextInputType.phone,
+                                  ),
+                                  SizedBox(height: pagePad * 0.7),
+                                  _buildField(
+                                    _addressController,
+                                    'Address',
+                                    'Enter address',
+                                    bodySize,
+                                  ),
+                                  SizedBox(height: pagePad),
+
+                                  // Submit button
                                   SizedBox(
-                                    width: fieldWidth,
-                                    child: TextField(
-                                      controller: _nameController,
-                                      decoration: InputDecoration(
-                                        labelText: 'Full Name',
-                                        hintText: 'Enter full name',
-                                        border: OutlineInputBorder(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      onPressed: _submitDonor,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color.fromARGB(
+                                          255,
+                                          224,
+                                          79,
+                                          69,
+                                        ),
+                                        foregroundColor: Colors.white,
+                                        padding: EdgeInsets.symmetric(
+                                          vertical: pagePad * 0.8,
+                                        ),
+                                        shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(
                                             12,
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: fieldWidth,
-                                    child: TextField(
-                                      controller: _bloodController,
-                                      readOnly: true,
-                                      decoration: InputDecoration(
-                                        labelText: 'Blood Group',
-                                        hintText: 'Select blood group',
-                                        suffixIcon: const Icon(
-                                          Icons.arrow_drop_down,
-                                        ),
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                      ),
-                                      onTap: pickBloodGroup,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: fieldWidth,
-                                    child: TextField(
-                                      controller: _phoneController,
-                                      keyboardType: TextInputType.phone,
-                                      decoration: InputDecoration(
-                                        labelText: 'Phone Number',
-                                        hintText: 'Enter phone number',
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: fieldWidth,
-                                    child: TextField(
-                                      controller: _addressController,
-                                      decoration: InputDecoration(
-                                        labelText: 'Address',
-                                        hintText: 'Enter address',
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
+                                      child: Text(
+                                        'Submit',
+                                        style: TextStyle(fontSize: bodySize),
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 18),
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: _submitDonor,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color.fromARGB(
-                                      255,
-                                      224,
-                                      79,
-                                      69,
-                                    ),
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 14,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  child: const Text('Submit'),
-                                ),
-                              ),
                             ],
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    // Donor list section
-                    const Text(
-                      'Registered Blood Donors',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(255, 78, 91, 106),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    // Search bar
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withAlpha(220),
-                        borderRadius: BorderRadius.circular(14),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withAlpha(30),
-                            blurRadius: 10,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _searchController,
-                              decoration: const InputDecoration(
-                                hintText: 'Search by name',
-                                border: InputBorder.none,
-                              ),
-                              onChanged: (value) {
-                                setState(() {
-                                  _searchQuery = value.trim().toLowerCase();
-                                });
-                              },
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: () {
-                              setState(() {
-                                _searchQuery = _searchController.text
-                                    .trim()
-                                    .toLowerCase();
-                              });
-                            },
-                            icon: const Icon(Icons.search),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    // Blood group filters
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: _bloodGroups.map((group) {
-                          final isSelected = _selectedBloodFilter == group;
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: ChoiceChip(
-                              label: Text(group),
-                              selected: isSelected,
-                              onSelected: (_) {
-                                setState(() {
-                                  _selectedBloodFilter = group;
-                                });
-                              },
-                              selectedColor: const Color.fromARGB(
-                                255,
-                                120,
-                                160,
-                                220,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    // Donor cards
-                    ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: filteredDonors.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        final donor = filteredDonors[index];
-                        final initials = donor['name']!
-                            .split(' ')
-                            .where((part) => part.isNotEmpty)
-                            .take(2)
-                            .map((part) => part[0])
-                            .join();
+                        ),
 
-                        final donorKey =
-                            '${donor['name']!.toLowerCase()}|${donor['phone']!.toLowerCase()}';
-                        final isMine = donorKey == _myEntryKey;
+                        SizedBox(height: pagePad * 1.2),
 
-                        return Container(
-                          padding: const EdgeInsets.all(12),
+                        // ===== REGISTERED DONORS =====
+                        Text(
+                          'Registered Blood Donors',
+                          style: TextStyle(
+                            fontSize: titleSize,
+                            fontWeight: FontWeight.bold,
+                            color: const Color.fromARGB(255, 78, 91, 106),
+                          ),
+                        ),
+                        SizedBox(height: pagePad * 0.7),
+
+                        // Search bar
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: pagePad * 0.6,
+                            vertical: pagePad * 0.3,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white.withAlpha(220),
                             borderRadius: BorderRadius.circular(14),
@@ -512,166 +554,304 @@ class _BloodPageState extends State<BloodPage> {
                             ],
                           ),
                           child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              CircleAvatar(
-                                radius: 24,
-                                backgroundColor: const Color.fromARGB(
-                                  255,
-                                  200,
-                                  220,
-                                  245,
-                                ),
-                                child: Text(
-                                  initials.toUpperCase(),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Color.fromARGB(255, 78, 91, 106),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
                               Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      donor['name']!,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Row(
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 2,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: const Color.fromARGB(
-                                              255,
-                                              245,
-                                              219,
-                                              217,
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            donor['blood']!,
-                                            style: const TextStyle(
-                                              color: Color.fromARGB(
-                                                255,
-                                                182,
-                                                70,
-                                                70,
-                                              ),
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(
-                                            donor['address']!,
-                                            style: const TextStyle(
-                                              color: Color.fromARGB(
-                                                255,
-                                                120,
-                                                120,
-                                                120,
-                                              ),
-                                            ),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      donor['phone']!,
-                                      style: const TextStyle(
-                                        color: Color.fromARGB(
-                                          255,
-                                          95,
-                                          128,
-                                          178,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                child: TextField(
+                                  controller: _searchController,
+                                  style: TextStyle(fontSize: bodySize),
+                                  decoration: InputDecoration(
+                                    hintText: 'Search by name',
+                                    hintStyle: TextStyle(fontSize: bodySize),
+                                    border: InputBorder.none,
+                                  ),
+                                  onChanged: (v) {
+                                    setState(() {
+                                      _searchQuery = v.trim().toLowerCase();
+                                    });
+                                  },
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              if (isMine)
-                                Row(
-                                  children: [
-                                    IconButton(
-                                      onPressed: () => _startEdit(donor),
-                                      icon: const Icon(Icons.edit),
-                                    ),
-                                    IconButton(
-                                      onPressed: () => _updateMyEntry(donor),
-                                      icon: const Icon(Icons.check_circle),
-                                    ),
-                                    IconButton(
-                                      onPressed: () => _deleteMyEntry(donor),
-                                      icon: const Icon(Icons.delete),
-                                    ),
-                                    ElevatedButton.icon(
-                                      onPressed: () =>
-                                          _handleRequest(donor['phone']!),
-                                      icon: const Icon(Icons.call),
-                                      label: const Text('Request'),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color.fromARGB(
-                                          255,
-                                          120,
-                                          160,
-                                          220,
-                                        ),
-                                        foregroundColor: Colors.white,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            20,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              else
-                                ElevatedButton.icon(
-                                  onPressed: () =>
-                                      _handleRequest(donor['phone']!),
-                                  icon: const Icon(Icons.call),
-                                  label: const Text('Request'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color.fromARGB(
-                                      255,
-                                      120,
-                                      160,
-                                      220,
-                                    ),
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                  ),
-                                ),
+                              Icon(Icons.search, size: width * 0.06),
                             ],
                           ),
-                        );
-                      },
+                        ),
+                        SizedBox(height: pagePad * 0.7),
+
+                        // Blood group filter chips
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: _bloodGroups.map((group) {
+                              final isSelected = _selectedBloodFilter == group;
+                              return Padding(
+                                padding: EdgeInsets.only(right: pagePad * 0.5),
+                                child: ChoiceChip(
+                                  label: Text(
+                                    group,
+                                    style: TextStyle(fontSize: smallSize),
+                                  ),
+                                  selected: isSelected,
+                                  onSelected: (_) {
+                                    setState(() {
+                                      _selectedBloodFilter = group;
+                                    });
+                                  },
+                                  selectedColor: const Color.fromARGB(
+                                    255,
+                                    120,
+                                    160,
+                                    220,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                        SizedBox(height: pagePad * 0.7),
+
+                        // Donor cards
+                        if (_loading)
+                          const Center(child: CircularProgressIndicator())
+                        else if (filtered.isEmpty)
+                          Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(pagePad * 2),
+                              child: Text(
+                                'No donors found.',
+                                style: TextStyle(
+                                  fontSize: bodySize,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ),
+                          )
+                        else
+                          ...filtered.map(
+                            (donor) => _donorCard(
+                              donor,
+                              width,
+                              pagePad,
+                              bodySize,
+                              smallSize,
+                            ),
+                          ),
+
+                        SizedBox(height: pagePad),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ===== Reusable responsive text field =====
+  Widget _buildField(
+    TextEditingController ctrl,
+    String label,
+    String hint,
+    double fontSize, {
+    bool readOnly = false,
+    VoidCallback? onTap,
+    IconData? suffixIcon,
+    TextInputType? keyboard,
+  }) {
+    return TextField(
+      controller: ctrl,
+      readOnly: readOnly,
+      onTap: onTap,
+      keyboardType: keyboard,
+      style: TextStyle(fontSize: fontSize),
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        labelStyle: TextStyle(fontSize: fontSize),
+        hintStyle: TextStyle(fontSize: fontSize * 0.9),
+        suffixIcon: suffixIcon != null ? Icon(suffixIcon) : null,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: fontSize * 0.8,
+          vertical: fontSize * 0.7,
+        ),
+      ),
+    );
+  }
+
+  // ===== Donor card =====
+  Widget _donorCard(
+    Map<String, dynamic> donor,
+    double width,
+    double pagePad,
+    double bodySize,
+    double smallSize,
+  ) {
+    final name = (donor['name'] ?? '') as String;
+    final blood = (donor['blood_group'] ?? '') as String;
+    final phone = (donor['phone'] ?? '') as String;
+    final address = (donor['address'] ?? '') as String;
+    final donorUserId = donor['user_id'] as String?;
+
+    // User can manage their own entry; admin can manage all
+    final isMine = _userId != null && donorUserId == _userId;
+    final canManage = isMine || _isAdmin;
+
+    // Initials from name
+    final initials = name
+        .split(' ')
+        .where((p) => p.isNotEmpty)
+        .take(2)
+        .map((p) => p[0].toUpperCase())
+        .join();
+
+    return Container(
+      margin: EdgeInsets.only(bottom: pagePad * 0.7),
+      padding: EdgeInsets.all(pagePad * 0.7),
+      decoration: BoxDecoration(
+        color: Colors.white.withAlpha(220),
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(30),
+            blurRadius: 10,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Avatar
+          CircleAvatar(
+            radius: width * 0.06,
+            backgroundColor: const Color.fromARGB(255, 200, 220, 245),
+            child: Text(
+              initials,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: bodySize,
+                color: const Color.fromARGB(255, 78, 91, 106),
+              ),
+            ),
+          ),
+          SizedBox(width: pagePad * 0.6),
+
+          // Info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: TextStyle(
+                    fontSize: bodySize,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: pagePad * 0.2),
+                Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: pagePad * 0.4,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 245, 219, 217),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        blood,
+                        style: TextStyle(
+                          color: const Color.fromARGB(255, 182, 70, 70),
+                          fontWeight: FontWeight.bold,
+                          fontSize: smallSize,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: pagePad * 0.4),
+                    Expanded(
+                      child: Text(
+                        address,
+                        style: TextStyle(
+                          color: Colors.black54,
+                          fontSize: smallSize,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 ),
-              ),
+                SizedBox(height: pagePad * 0.2),
+                Text(
+                  phone,
+                  style: TextStyle(
+                    color: const Color.fromARGB(255, 95, 128, 178),
+                    fontSize: smallSize,
+                  ),
+                ),
+              ],
             ),
+          ),
+
+          // Action buttons
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Request / Call button
+              ElevatedButton(
+                onPressed: () => _handleRequest(phone),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 120, 160, 220),
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: pagePad * 0.6,
+                    vertical: pagePad * 0.3,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.call, size: width * 0.04),
+                    SizedBox(width: pagePad * 0.2),
+                    Text('Request', style: TextStyle(fontSize: smallSize)),
+                  ],
+                ),
+              ),
+
+              // Edit / Delete — own entry or admin
+              if (canManage)
+                Padding(
+                  padding: EdgeInsets.only(top: pagePad * 0.3),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        onPressed: () => _editEntry(donor),
+                        icon: Icon(Icons.edit, size: width * 0.045),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                      SizedBox(width: pagePad * 0.3),
+                      IconButton(
+                        onPressed: () => _deleteEntry(donor),
+                        icon: Icon(
+                          Icons.delete,
+                          size: width * 0.045,
+                          color: Colors.red,
+                        ),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
           ),
         ],
       ),

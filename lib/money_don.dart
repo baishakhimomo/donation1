@@ -14,7 +14,7 @@ class _MoneyDonationPageState extends State<MoneyDonationPage> {
   final _amountController = TextEditingController();
 
   //Replace with your real admin number
-  static const String adminPhoneNumber = "017XXXXXXXX";
+  static const String adminPhoneNumber = "01990108343";
 
   Future<void> pickPaymentMethod() async {
     final String? selected = await showModalBottomSheet<String>(

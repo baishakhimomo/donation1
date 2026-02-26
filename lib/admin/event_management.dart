@@ -1,69 +1,182 @@
 import 'package:donation_app/after_join_event.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-final List<Map<String, dynamic>> eventStore = [
+// ============ ICON MAPPING ============
+// Convert IconData to string (to save in Supabase)
+String iconToKey(IconData icon) {
+  if (icon == Icons.food_bank) return 'food_bank';
+  if (icon == Icons.checkroom) return 'checkroom';
+  if (icon == Icons.monetization_on) return 'monetization_on';
+  if (icon == Icons.bloodtype) return 'bloodtype';
+  if (icon == Icons.storefront) return 'storefront';
+  if (icon == Icons.set_meal) return 'set_meal';
+  if (icon == Icons.restaurant) return 'restaurant';
+  if (icon == Icons.palette) return 'palette';
+  return 'event';
+}
+
+// Convert string back to IconData (when reading from Supabase)
+IconData keyToIcon(String key) {
+  if (key == 'food_bank') return Icons.food_bank;
+  if (key == 'checkroom') return Icons.checkroom;
+  if (key == 'monetization_on') return Icons.monetization_on;
+  if (key == 'bloodtype') return Icons.bloodtype;
+  if (key == 'storefront') return Icons.storefront;
+  if (key == 'set_meal') return Icons.set_meal;
+  if (key == 'restaurant') return Icons.restaurant;
+  if (key == 'palette') return Icons.palette;
+  return Icons.event;
+}
+
+// ============ DATE HELPERS ============
+final _months = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
+
+// "2026-03-10" → "Mar 10, 2026"
+String formatDate(String isoDate) {
+  final parts = isoDate.split('-');
+  if (parts.length != 3) return isoDate;
+  final year = parts[0];
+  final month = int.tryParse(parts[1]) ?? 1;
+  final day = int.tryParse(parts[2]) ?? 1;
+  return '${_months[month - 1]} $day, $year';
+}
+
+// "Mar 10, 2026" → "2026-03-10"
+String toIsoDate(String displayDate) {
+  final clean = displayDate.replaceAll(',', '').split(' ');
+  if (clean.length != 3) return displayDate;
+  final month = _months.indexOf(clean[0]) + 1;
+  if (month == 0) return displayDate;
+  final day = clean[1].padLeft(2, '0');
+  final year = clean[2];
+  return '$year-${month.toString().padLeft(2, '0')}-$day';
+}
+
+// ============ ACTION TEMPLATES (shared) ============
+final List<Map<String, dynamic>> actionTemplates = [
   {
-    'title': 'Iftar Sharing 2026',
-    'timeDisplay': 'Jan 10 · 6:00 PM',
-    'date': 'Jan 10, 2026',
-    'location': 'New Hall, LU Campus',
-    'description': 'Providing iftar meals to the needy during Ramadan.',
-    'notice': 'New event created. Please check the details and join us!',
-    'status': 'Active',
-    'icon': Icons.food_bank,
-    'cardColor': const Color.fromARGB(255, 113, 160, 118),
-    'iconColor': const Color.fromARGB(255, 113, 160, 118),
-    'actions': [
-      {
-        'title': 'Donate Food',
-        'subtitle': 'Contribute fresh meals for iftar.',
-        'icon': Icons.restaurant,
-        'color': const Color.fromARGB(255, 113, 160, 118),
-      },
-      {
-        'title': 'Donate Money',
-        'subtitle': 'Make a monetary donation to support the event.',
-        'icon': Icons.monetization_on,
-        'color': const Color.fromARGB(255, 113, 160, 118),
-      },
-      {
-        'title': 'Pay Registration Fee',
-        'subtitle': 'Art Competition Entry - 100 BDT',
-        'icon': Icons.palette,
-        'color': const Color.fromARGB(255, 195, 150, 70),
-      },
-      {
-        'title': 'Apply for Stall',
-        'subtitle': 'Book a stall at our event.',
-        'icon': Icons.storefront,
-        'color': const Color.fromARGB(255, 140, 120, 200),
-      },
-    ],
+    'key': 'Donate Food',
+    'title': 'Donate Food',
+    'subtitle': 'Contribute fresh meals for iftar.',
+    'icon': Icons.restaurant,
+    'color': const Color.fromARGB(255, 113, 160, 118),
   },
   {
-    'title': 'Food Stalls',
-    'timeDisplay': 'Feb 15 · 11:00 AM',
-    'date': 'Feb 15, 2026',
-    'location': 'Open Ground',
-    'description': 'Local food stalls to support community funds.',
-    'notice': 'Stall booking is open. Limited slots available.',
-    'status': 'Active',
-    'icon': Icons.set_meal,
-    'cardColor': const Color.fromARGB(255, 113, 212, 116),
-    'iconColor': const Color.fromARGB(255, 113, 212, 116),
-    'actions': [
-      {
-        'title': 'Apply for Stall',
-        'subtitle': 'Book a stall at our event.',
-        'icon': Icons.storefront,
-        'color': const Color.fromARGB(255, 113, 212, 116),
-      },
-    ],
+    'key': 'Donate Clothes',
+    'title': 'Donate Clothes',
+    'subtitle': 'Support with clothes for those in need.',
+    'icon': Icons.checkroom,
+    'color': const Color.fromARGB(255, 144, 202, 249),
+  },
+  {
+    'key': 'Donate Money',
+    'title': 'Donate Money',
+    'subtitle': 'Make a monetary donation to support the event.',
+    'icon': Icons.monetization_on,
+    'color': const Color.fromARGB(255, 113, 160, 118),
+  },
+  {
+    'key': 'Pay Registration Fee',
+    'title': 'Pay Registration Fee',
+    'subtitle': 'Registration fee will be applied.',
+    'icon': Icons.palette,
+    'color': const Color.fromARGB(255, 195, 150, 70),
+  },
+  {
+    'key': 'Apply for Stall',
+    'title': 'Apply for Stall',
+    'subtitle': 'Book a stall at our event.',
+    'icon': Icons.storefront,
+    'color': const Color.fromARGB(255, 140, 120, 200),
   },
 ];
 
-List<Map<String, dynamic>> getActiveEvents() {
-  return eventStore.where((event) => event['status'] == 'Active').toList();
+// ============ CONVERT SUPABASE ROW → FLUTTER MAP ============
+Map<String, dynamic> rowToEvent(Map<String, dynamic> row) {
+  // Build actions list from jsonb stored in Supabase
+  final List<dynamic> stored = row['actions'] ?? [];
+  final List<Map<String, dynamic>> actions = [];
+
+  for (final item in stored) {
+    if (item is Map) {
+      final String key = (item['key'] ?? '') as String;
+      final String customSub = (item['subtitle'] ?? '') as String;
+
+      // Find matching template
+      Map<String, dynamic> tmpl = {};
+      for (final t in actionTemplates) {
+        if (t['key'] == key) {
+          tmpl = t;
+          break;
+        }
+      }
+
+      if (tmpl.isNotEmpty) {
+        actions.add({
+          'title': tmpl['title'],
+          'subtitle': customSub.isNotEmpty ? customSub : tmpl['subtitle'],
+          'icon': tmpl['icon'],
+          'color': tmpl['color'],
+        });
+      }
+    }
+  }
+
+  // Convert color int back to Color
+  final int colorVal = (row['card_color'] as num?)?.toInt() ?? 0xFF71A076;
+  final Color color = Color(colorVal);
+
+  return {
+    'id': row['id'],
+    'title': row['title'] ?? '',
+    'date': formatDate(row['event_date'] ?? ''),
+    'timeDisplay': row['event_time'] ?? '',
+    'location': row['location'] ?? '',
+    'description': row['description'] ?? '',
+    'notice': row['notice_text'] ?? '',
+    'status': (row['is_active'] == true) ? 'Active' : 'Closed',
+    'icon': keyToIcon((row['icon_key'] ?? 'event') as String),
+    'cardColor': color,
+    'iconColor': color,
+    'actions': actions,
+  };
+}
+
+// ============ FETCH FUNCTIONS (used by Home, Notice, About) ============
+
+// Fetch only active events (public — works without login)
+Future<List<Map<String, dynamic>>> fetchActiveEvents() async {
+  final data = await Supabase.instance.client
+      .from('events')
+      .select()
+      .eq('is_active', true)
+      .order('created_at', ascending: false);
+
+  return data.map<Map<String, dynamic>>((row) => rowToEvent(row)).toList();
+}
+
+// Fetch all events (admin sees active + closed)
+Future<List<Map<String, dynamic>>> fetchAllEvents() async {
+  final data = await Supabase.instance.client
+      .from('events')
+      .select()
+      .order('created_at', ascending: false);
+
+  return data.map<Map<String, dynamic>>((row) => rowToEvent(row)).toList();
 }
 
 class EventManagementPage extends StatefulWidget {
@@ -85,6 +198,10 @@ class _EventManagementPageState extends State<EventManagementPage> {
   String _status = 'Active';
   IconData _selectedIcon = Icons.event;
   Color _selectedColor = const Color.fromARGB(255, 113, 160, 118);
+
+  // Events loaded from Supabase
+  List<Map<String, dynamic>> _events = [];
+  bool _loading = true;
 
   final List<Map<String, dynamic>> _iconOptions = [
     {'label': 'Food', 'icon': Icons.food_bank},
@@ -114,43 +231,11 @@ class _EventManagementPageState extends State<EventManagementPage> {
 
   final Map<String, bool> _actionEnabled = Map.from(_initialActionStates);
 
-  final List<Map<String, dynamic>> _actionTemplates = [
-    {
-      'key': 'Donate Food',
-      'title': 'Donate Food',
-      'subtitle': 'Contribute fresh meals for iftar.',
-      'icon': Icons.restaurant,
-      'color': const Color.fromARGB(255, 113, 160, 118),
-    },
-    {
-      'key': 'Donate Clothes',
-      'title': 'Donate Clothes',
-      'subtitle': 'Support with clothes for those in need.',
-      'icon': Icons.checkroom,
-      'color': const Color.fromARGB(255, 144, 202, 249),
-    },
-    {
-      'key': 'Donate Money',
-      'title': 'Donate Money',
-      'subtitle': 'Make a monetary donation to support the event.',
-      'icon': Icons.monetization_on,
-      'color': const Color.fromARGB(255, 113, 160, 118),
-    },
-    {
-      'key': 'Pay Registration Fee',
-      'title': 'Pay Registration Fee',
-      'subtitle': 'Registration fee will be applied.',
-      'icon': Icons.palette,
-      'color': const Color.fromARGB(255, 195, 150, 70),
-    },
-    {
-      'key': 'Apply for Stall',
-      'title': 'Apply for Stall',
-      'subtitle': 'Book a stall at our event.',
-      'icon': Icons.storefront,
-      'color': const Color.fromARGB(255, 140, 120, 200),
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadEvents();
+  }
 
   @override
   void dispose() {
@@ -164,67 +249,92 @@ class _EventManagementPageState extends State<EventManagementPage> {
     super.dispose();
   }
 
-  void _saveEvent() {
-    final actions = _buildActions();
-
-    final newEvent = {
-      'title': _titleController.text.trim(),
-      'timeDisplay': _timeController.text.trim(),
-      'date': _dateController.text.trim(),
-      'location': _locationController.text.trim(),
-      'description': _descriptionController.text.trim(),
-      'notice': _noticeController.text.trim(),
-      'status': _status,
-      'icon': _selectedIcon,
-      'cardColor': _selectedColor,
-      'iconColor': _selectedColor,
-      'actions': actions,
-    };
-
-    setState(() {
-      eventStore.insert(0, newEvent);
-      _clearForm();
-    });
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AfterJoinEventPage(
-          event: newEvent,
-          onEventUpdated: (updatedEvent) {
-            setState(() {});
-          },
-        ),
-      ),
-    );
+  // Load all events from Supabase
+  Future<void> _loadEvents() async {
+    setState(() => _loading = true);
+    try {
+      final events = await fetchAllEvents();
+      setState(() {
+        _events = events;
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() => _loading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading: $e')));
+      }
+    }
   }
 
-  List<Map<String, dynamic>> _buildActions() {
+  // Save event to Supabase
+  Future<void> _saveEvent() async {
+    if (_titleController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please enter a title.')));
+      return;
+    }
+
+    // Build actions list for Supabase jsonb
     final List<Map<String, dynamic>> actions = [];
-
-    for (final template in _actionTemplates) {
+    for (final template in actionTemplates) {
       final String key = template['key'] as String;
-      final bool enabled = _actionEnabled[key] ?? false;
-
-      if (!enabled) {
-        continue;
-      }
+      if (_actionEnabled[key] != true) continue;
 
       String subtitle = template['subtitle'] as String;
       if (key == 'Pay Registration Fee' &&
           _feeController.text.trim().isNotEmpty) {
         subtitle = 'Registration fee - ${_feeController.text.trim()}';
       }
-
-      actions.add({
-        'title': template['title'],
-        'subtitle': subtitle,
-        'icon': template['icon'],
-        'color': template['color'],
-      });
+      actions.add({'key': key, 'subtitle': subtitle});
     }
 
-    return actions;
+    try {
+      // Insert into Supabase
+      final row = await Supabase.instance.client
+          .from('events')
+          .insert({
+            'title': _titleController.text.trim(),
+            'event_date': toIsoDate(_dateController.text.trim()),
+            'event_time': _timeController.text.trim(),
+            'location': _locationController.text.trim(),
+            'description': _descriptionController.text.trim(),
+            'notice_text': _noticeController.text.trim(),
+            'card_color': _selectedColor.value,
+            'icon_key': iconToKey(_selectedIcon),
+            'actions': actions,
+            'is_active': _status == 'Active',
+          })
+          .select()
+          .single();
+
+      final newEvent = rowToEvent(row);
+
+      _clearForm();
+      await _loadEvents();
+
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AfterJoinEventPage(
+              event: newEvent,
+              onEventUpdated: (updatedEvent) {
+                _loadEvents();
+              },
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error saving: $e')));
+      }
+    }
   }
 
   void _clearForm() {
@@ -451,7 +561,7 @@ class _EventManagementPageState extends State<EventManagementPage> {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            ..._actionTemplates.map((template) {
+            ...actionTemplates.map((template) {
               final String key = template['key'] as String;
               return CheckboxListTile(
                 contentPadding: EdgeInsets.zero,
@@ -492,67 +602,85 @@ class _EventManagementPageState extends State<EventManagementPage> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            ...eventStore.map((event) {
-              final Color badgeColor = event['cardColor'] as Color;
-              return Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(20),
-                      blurRadius: 6,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundColor: badgeColor,
-                      child: Icon(
-                        event['icon'] as IconData,
-                        color: Colors.white,
+
+            // Show loading or event list from Supabase
+            if (_loading)
+              const Center(child: CircularProgressIndicator())
+            else if (_events.isEmpty)
+              const Text(
+                'No events created yet.',
+                style: TextStyle(color: Colors.black54),
+              )
+            else
+              ..._events.map((event) {
+                final Color badgeColor =
+                    event['cardColor'] as Color? ?? Colors.green;
+                final String status = event['status'] as String? ?? 'Active';
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(20),
+                        blurRadius: 6,
+                        offset: const Offset(0, 4),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            event['title'] as String,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            event['status'] as String,
-                            style: const TextStyle(color: Colors.black54),
-                          ),
-                        ],
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: badgeColor,
+                        child: Icon(
+                          event['icon'] as IconData? ?? Icons.event,
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => AfterJoinEventPage(
-                              event: event,
-                              onEventUpdated: (updatedEvent) {
-                                setState(() {});
-                              },
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              event['title'] as String? ?? '',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                      child: const Text('Preview'),
-                    ),
-                  ],
-                ),
-              );
-            }),
+                            Text(
+                              status,
+                              style: TextStyle(
+                                color: status == 'Active'
+                                    ? Colors.green
+                                    : Colors.red,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AfterJoinEventPage(
+                                event: event,
+                                onEventUpdated: (updatedEvent) {
+                                  _loadEvents();
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Text('Preview'),
+                      ),
+                    ],
+                  ),
+                );
+              }),
           ],
         ),
       ),

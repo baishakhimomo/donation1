@@ -12,7 +12,13 @@ class Notice extends StatefulWidget {
 
 class _NoticeState extends State<Notice> {
   bool showClub = true; // default selected
-  int expandedIndex = -1;
+  int _clubExpandedIndex = -1;
+  int _memberExpandedIndex = -1;
+
+  // Events loaded from Supabase
+  List<Map<String, dynamic>> _events = [];
+  bool _loading = true;
+  bool _isAdmin = false;
 
   // Check if current user is logged in as a member (@lussc.local email)
   bool get isMember {
@@ -20,6 +26,43 @@ class _NoticeState extends State<Notice> {
     if (session == null) return false;
     final email = session.user.email ?? '';
     return email.endsWith('@lussc.local');
+  }
+
+  // Can access member notices if member or admin
+  bool get canAccessMember => isMember || _isAdmin;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEvents();
+    _checkAdmin();
+  }
+
+  Future<void> _checkAdmin() async {
+    final session = Supabase.instance.client.auth.currentSession;
+    if (session == null) return;
+    final email = session.user.email ?? '';
+    try {
+      final row = await Supabase.instance.client
+          .from('admin_emails')
+          .select()
+          .eq('email', email)
+          .maybeSingle();
+      if (mounted) setState(() => _isAdmin = row != null);
+    } catch (_) {}
+  }
+
+  Future<void> _loadEvents() async {
+    setState(() => _loading = true);
+    try {
+      final events = await fetchActiveEvents();
+      setState(() {
+        _events = events;
+        _loading = false;
+      });
+    } catch (_) {
+      setState(() => _loading = false);
+    }
   }
 
   @override
@@ -134,7 +177,7 @@ class _NoticeState extends State<Notice> {
                           Expanded(
                             child: GestureDetector(
                               onTap: () {
-                                if (isMember) {
+                                if (canAccessMember) {
                                   setState(() {
                                     showClub = false; // Member active
                                   });
@@ -163,7 +206,7 @@ class _NoticeState extends State<Notice> {
                                   vertical: 12,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: !showClub && isMember
+                                  color: !showClub && canAccessMember
                                       ? Colors
                                             .blue // Active hole blue dekhabe
                                       : Colors.transparent,
@@ -172,18 +215,19 @@ class _NoticeState extends State<Notice> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    if (!isMember)
+                                    if (!canAccessMember)
                                       const Icon(
                                         Icons.lock,
                                         size: 16,
                                         color: Colors.black54,
                                       ),
-                                    if (!isMember) const SizedBox(width: 4),
+                                    if (!canAccessMember)
+                                      const SizedBox(width: 4),
                                     Text(
                                       "Members",
                                       style: TextStyle(
                                         fontWeight: FontWeight.w600,
-                                        color: !showClub && isMember
+                                        color: !showClub && canAccessMember
                                             ? Colors.white
                                             : Colors.black54,
                                       ),
@@ -203,7 +247,13 @@ class _NoticeState extends State<Notice> {
               const SizedBox(height: 20),
 
               //  Notices Content
-              Expanded(child: showClub ? clubNotices() : memberNotices()),
+              Expanded(
+                child: _loading
+                    ? const Center(child: CircularProgressIndicator())
+                    : showClub
+                    ? clubNotices()
+                    : memberNotices(),
+              ),
             ],
           ),
         ],
@@ -211,9 +261,9 @@ class _NoticeState extends State<Notice> {
     );
   }
 
-  // Club Notices — show events from eventStore as simple notices
+  // Club Notices — show active events from Supabase
   Widget clubNotices() {
-    final events = eventStore.where((e) => e['status'] == 'Active').toList();
+    final events = _events;
 
     if (events.isEmpty) {
       return const Center(
@@ -256,9 +306,9 @@ class _NoticeState extends State<Notice> {
     );
   }
 
-  // Members Notices — show events with Join button, only for members
+  // Members Notices — show active events from Supabase, with Join button
   Widget memberNotices() {
-    final events = eventStore.where((e) => e['status'] == 'Active').toList();
+    final events = _events;
 
     if (events.isEmpty) {
       return const Center(
@@ -312,7 +362,7 @@ class _NoticeState extends State<Notice> {
     String? time,
     bool isNew = false,
   }) {
-    bool isExpanded = expandedIndex == index;
+    bool isExpanded = _clubExpandedIndex == index;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -402,9 +452,9 @@ class _NoticeState extends State<Notice> {
                   onTap: () {
                     setState(() {
                       if (isExpanded) {
-                        expandedIndex = -1;
+                        _clubExpandedIndex = -1;
                       } else {
-                        expandedIndex = index;
+                        _clubExpandedIndex = index;
                       }
                     });
                   },
@@ -436,7 +486,7 @@ class _NoticeState extends State<Notice> {
     String? time,
     bool isNew = false,
   }) {
-    bool isExpanded = expandedIndex == index;
+    bool isExpanded = _memberExpandedIndex == index;
     final String status = event['status'] as String? ?? 'Active';
 
     return Container(
@@ -529,9 +579,9 @@ class _NoticeState extends State<Notice> {
                   onTap: () {
                     setState(() {
                       if (isExpanded) {
-                        expandedIndex = -1;
+                        _memberExpandedIndex = -1;
                       } else {
-                        expandedIndex = index;
+                        _memberExpandedIndex = index;
                       }
                     });
                   },

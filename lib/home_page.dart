@@ -13,6 +13,7 @@ import 'package:donation_app/money_don.dart';
 import 'package:donation_app/notice.dart';
 import 'package:donation_app/profile.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -36,11 +37,13 @@ class _HomePageState extends State<HomePage> {
     'assets/winterpic.jpeg',
   ];
 
-  List<Map<String, dynamic>> get activeEvents => getActiveEvents();
+  // Events loaded from Supabase
+  List<Map<String, dynamic>> _activeEvents = [];
 
   @override
   void initState() {
     super.initState();
+    _loadEvents();
 
     _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
       if (_pageController.hasClients) {
@@ -68,13 +71,45 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
+  // Load active events from Supabase
+  Future<void> _loadEvents() async {
+    try {
+      final events = await fetchActiveEvents();
+      setState(() => _activeEvents = events);
+    } catch (_) {}
+  }
+
   void mainWorkClick(String name) {
     if (name == 'Blood') {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const BloodPage()),
       );
-    } else if (name == 'Clothes') {
+      return;
+    }
+
+    // For Clothes, Food, Money — require login
+    final session = Supabase.instance.client.auth.currentSession;
+    if (session == null) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Login Required'),
+          content: const Text(
+            'Please log in as a donor or member to access this section.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    if (name == 'Clothes') {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => const ClothDonation()),
@@ -276,7 +311,7 @@ class _HomePageState extends State<HomePage> {
 
                   SizedBox(height: pagePad * 0.8),
 
-                  activeEvents.isEmpty
+                  _activeEvents.isEmpty
                       ? Container(
                           width: double.infinity,
                           padding: EdgeInsets.all(pagePad * 2),
@@ -297,7 +332,7 @@ class _HomePageState extends State<HomePage> {
                           height: width * 0.45,
                           child: ListView(
                             scrollDirection: Axis.horizontal,
-                            children: activeEvents.map((event) {
+                            children: _activeEvents.map((event) {
                               final Color baseColor =
                                   event['cardColor'] as Color;
                               final IconData iconData =
@@ -357,6 +392,33 @@ class _HomePageState extends State<HomePage> {
                                       alignment: Alignment.bottomRight,
                                       child: ElevatedButton(
                                         onPressed: () {
+                                          // Check if user is logged in
+                                          final session = Supabase
+                                              .instance
+                                              .client
+                                              .auth
+                                              .currentSession;
+                                          if (session == null) {
+                                            showDialog(
+                                              context: context,
+                                              builder: (ctx) => AlertDialog(
+                                                title: const Text(
+                                                  'Login Required',
+                                                ),
+                                                content: const Text(
+                                                  'Please login as a donor or member to join this event.',
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () =>
+                                                        Navigator.pop(ctx),
+                                                    child: const Text('OK'),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                            return;
+                                          }
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(

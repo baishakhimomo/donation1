@@ -36,14 +36,14 @@ class _SplashScreenState extends State<SplashScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Image.asset("assets/backremove.jpeg", width: 300),
+                Image.asset("assets/logobackremove.png", width: 300),
                 const SizedBox(height: 20),
                 Text(
                   "LUSSC",
                   style: TextStyle(
                     fontSize: 40,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blueGrey.shade800,
+                    color: const Color.fromARGB(255, 55, 71, 79),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -51,15 +51,38 @@ class _SplashScreenState extends State<SplashScreen> {
                   "Leading University\nSocial Services Club",
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.blueGrey.shade700,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    height: 1.25,
+                    letterSpacing: 0.2,
+                    color: const Color.fromARGB(255, 38, 50, 56),
+                    shadows: [
+                      Shadow(
+                        color: Colors.white.withAlpha(160),
+                        blurRadius: 6,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   "Serving Humanity Through\nStudent-Led Initiatives",
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 15, color: Colors.blueGrey),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    height: 1.25,
+                    letterSpacing: 0.15,
+                    color: const Color.fromARGB(255, 55, 71, 79),
+                    shadows: [
+                      Shadow(
+                        color: Colors.white.withAlpha(150),
+                        blurRadius: 6,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

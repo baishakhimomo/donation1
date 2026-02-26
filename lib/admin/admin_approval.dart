@@ -1,3 +1,4 @@
+import 'package:donation_app/admin/event_management.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -110,6 +111,20 @@ class _AdminApprovalPageState extends State<AdminApprovalPage> {
           .eq('trx_id', trxId);
     }
 
+    // Send approval email notification (saved to DB; webhook/Edge Function sends it)
+    final contactEmail = (member['contact_email'] ?? '').toString();
+    if (contactEmail.isNotEmpty) {
+      await sendNotificationEmail(
+        toEmail: contactEmail,
+        subject: 'LUSSC Membership Approved!',
+        body:
+            'Dear ${member['name'] ?? 'Member'},\n\n'
+            'Congratulations! Your LUSSC membership has been approved.\n'
+            'You can now log in with your Student ID and password.\n\n'
+            'Welcome to the LUSSC family!\n\nBest regards,\nLUSSC Admin',
+      );
+    }
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text("${member['name'] ?? studentId} approved")),
     );
@@ -170,11 +185,45 @@ class _AdminApprovalPageState extends State<AdminApprovalPage> {
           .eq('trx_id', trxId);
     }
 
+    // Send rejection email notification (saved to DB; webhook/Edge Function sends it)
+    final contactEmail = (member['contact_email'] ?? '').toString();
+    if (contactEmail.isNotEmpty) {
+      await sendNotificationEmail(
+        toEmail: contactEmail,
+        subject: 'LUSSC Membership Application - Rejected',
+        body:
+            'Dear ${member['name'] ?? 'Member'},\n\n'
+            'Unfortunately, your LUSSC membership application has been rejected.\n\n'
+            'Reason: $reason\n\n'
+            'If you think this is a mistake, please contact the admin.\n\n'
+            'Best regards,\nLUSSC Admin',
+      );
+    }
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text("${member['name'] ?? studentId} rejected")),
     );
 
     fetchPendingRequests(); // Refresh list
+  }
+
+  // Save email notification to DB. A Supabase Database Webhook/Edge Function
+  // should read this row and send it using Resend (your existing setup).
+  Future<void> sendNotificationEmail({
+    required String toEmail,
+    required String subject,
+    required String body,
+  }) async {
+    try {
+      await supabase.from('email_notifications').insert({
+        'to_email': toEmail,
+        'subject': subject,
+        'body': body,
+        'is_sent': false,
+      });
+    } catch (e) {
+      debugPrint('Failed to save email notification: $e');
+    }
   }
 
   Future<void> deleteRequest(Map<String, dynamic> request) async {
@@ -233,8 +282,39 @@ class _AdminApprovalPageState extends State<AdminApprovalPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Admin Approval"),
-        backgroundColor: const Color(0xFF1E6FA8),
+        title: const Text(
+          "Admin Approval",
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: const Color.fromARGB(255, 30, 111, 168),
+
+        actions: [
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EventManagementPage(),
+                    ),
+                  ),
+                  icon: Icon(Icons.receipt_long),
+                  color: Colors.white,
+                ),
+                Text(
+                  "Events",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
       body: loading
           ? const Center(child: CircularProgressIndicator())

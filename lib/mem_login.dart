@@ -1,3 +1,4 @@
+import 'package:donation_app/admin/admin_login.dart';
 import 'package:donation_app/donor_signUP.dart';
 import 'package:donation_app/home_page.dart';
 import 'package:donation_app/member_form.dart';
@@ -150,6 +151,21 @@ class _LoginState extends State<Login> {
                         //   onPressed: () {},
                         //   child: const Text("Donor Login"),
                         // ),
+                        IconButton(
+                          tooltip: 'Admin Login',
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const AdminLoginPage(),
+                              ),
+                            );
+                          },
+                          icon: const Icon(
+                            Icons.admin_panel_settings,
+                            color: Color(0xFF1E6FA8),
+                          ),
+                        ),
                       ],
                     ),
                   ),

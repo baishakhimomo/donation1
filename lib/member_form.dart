@@ -137,9 +137,12 @@ class _MemberFormState extends State<MemberForm> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final height = size.height;
-    final width = size.width;
+    final height = MediaQuery.sizeOf(context).height;
+    final width = MediaQuery.sizeOf(context).width;
+
+    final double pagePad = width * 0.04;
+    final double titleSize = width * 0.09;
+    final double sectionSize = width * 0.055;
 
     return Scaffold(
       appBar: AppBar(
@@ -147,14 +150,18 @@ class _MemberFormState extends State<MemberForm> {
         scrolledUnderElevation: 0,
         title: Row(
           children: [
-            SizedBox(width: 15),
-            Image.asset('assets/logo.jpeg', width: 30, height: 30),
-            SizedBox(width: 8),
+            SizedBox(width: pagePad),
+            Image.asset(
+              'assets/logo.jpeg',
+              width: width * 0.08,
+              height: width * 0.08,
+            ),
+            SizedBox(width: pagePad * 0.6),
             Text(
               "LUSSC",
               style: TextStyle(
                 color: Color.fromARGB(255, 78, 91, 106),
-                fontSize: 20,
+                fontSize: sectionSize,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -167,27 +174,27 @@ class _MemberFormState extends State<MemberForm> {
             child: Image.asset("assets/backg.png", fit: BoxFit.cover),
           ),
           Positioned(
-            top: 15,
-            left: 22,
-            right: 20,
+            top: pagePad,
+            left: pagePad * 1.5,
+            right: pagePad * 1.5,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   "Join the LUSSC Family!",
                   style: TextStyle(
-                    fontSize: 24,
+                    fontSize: titleSize,
                     fontWeight: FontWeight.bold,
                     color: Color.fromARGB(255, 78, 91, 106),
                   ),
                 ),
-                SizedBox(height: 8),
+                SizedBox(height: pagePad * 0.6),
 
                 Text(
                   "Fill out the form below to become a member of the Leading Umiversity Social Service Club and make a positive impact.",
                   textAlign: TextAlign.start,
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: sectionSize * 0.75,
                     color: Color.fromARGB(255, 78, 91, 106),
                   ),
                 ),
@@ -196,8 +203,13 @@ class _MemberFormState extends State<MemberForm> {
           ),
           Center(
             child: Container(
-              margin: EdgeInsets.fromLTRB(25, height * 0.15, 25, 30),
-              padding: const EdgeInsets.all(16),
+              margin: EdgeInsets.fromLTRB(
+                pagePad * 1.8,
+                height * 0.15,
+                pagePad * 1.8,
+                pagePad * 2,
+              ),
+              padding: EdgeInsets.all(pagePad),
               decoration: BoxDecoration(
                 color: Colors.white.withAlpha(220),
                 borderRadius: BorderRadius.circular(15),
@@ -214,7 +226,10 @@ class _MemberFormState extends State<MemberForm> {
                   Center(
                     child: Opacity(
                       opacity: 0.08,
-                      child: Image.asset("assets/logo.jpeg", width: 400),
+                      child: Image.asset(
+                        "assets/logo.jpeg",
+                        width: width * 0.85,
+                      ),
                     ),
                   ),
                   Column(
@@ -223,58 +238,61 @@ class _MemberFormState extends State<MemberForm> {
                       Text(
                         "Membership Registration Form",
                         style: TextStyle(
-                          fontSize: 22,
+                          fontSize: sectionSize,
                           fontWeight: FontWeight.bold,
                           color: Color.fromARGB(255, 72, 131, 198),
                         ),
                       ),
-                      SizedBox(height: 6),
+                      SizedBox(height: pagePad * 0.4),
 
-                      Row(
-                        children: [
-                          Text(
-                            "Step 1: Fill the form",
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Color.fromARGB(255, 72, 131, 198),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            Text(
+                              "Step 1: Fill the form",
+                              style: TextStyle(
+                                fontSize: sectionSize * 0.65,
+                                color: Color.fromARGB(255, 72, 131, 198),
+                              ),
                             ),
-                          ),
-                          SizedBox(width: 6),
-                          Icon(
-                            Icons.arrow_forward_ios,
-                            size: 14,
-                            color: const Color.fromARGB(255, 182, 179, 179),
-                          ),
-                          SizedBox(width: 6),
-                          Text(
-                            "Step 2: Pay fee",
-                            style: TextStyle(
-                              fontSize: 13,
+                            SizedBox(width: pagePad * 0.4),
+                            Icon(
+                              Icons.arrow_forward_ios,
+                              size: sectionSize * 0.7,
                               color: const Color.fromARGB(255, 182, 179, 179),
                             ),
-                          ),
-                          SizedBox(width: 6),
-                          Icon(
-                            Icons.arrow_forward_ios,
-                            size: 14,
-                            color: const Color.fromARGB(255, 182, 179, 179),
-                          ),
-                          SizedBox(width: 6),
-                          Text(
-                            "Step 3: Wait for admin verify",
-                            style: TextStyle(
-                              fontSize: 13,
+                            SizedBox(width: pagePad * 0.4),
+                            Text(
+                              "Step 2: Pay fee",
+                              style: TextStyle(
+                                fontSize: sectionSize * 0.65,
+                                color: const Color.fromARGB(255, 182, 179, 179),
+                              ),
+                            ),
+                            SizedBox(width: pagePad * 0.4),
+                            Icon(
+                              Icons.arrow_forward_ios,
+                              size: sectionSize * 0.7,
                               color: const Color.fromARGB(255, 182, 179, 179),
                             ),
-                          ),
-                        ],
+                            SizedBox(width: pagePad * 0.4),
+                            Text(
+                              "Step 3: Wait for admin verify",
+                              style: TextStyle(
+                                fontSize: sectionSize * 0.65,
+                                color: const Color.fromARGB(255, 182, 179, 179),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      SizedBox(height: 15),
+                      SizedBox(height: pagePad),
                       Expanded(
                         child: SingleChildScrollView(
                           child: Column(
                             children: [
-                              SizedBox(height: 10),
+                              SizedBox(height: pagePad * 0.7),
                               TextField(
                                 controller: _nameController,
                                 decoration: InputDecoration(
@@ -312,7 +330,7 @@ class _MemberFormState extends State<MemberForm> {
                                   ),
                                 ),
                               ),
-                              SizedBox(height: 20),
+                              SizedBox(height: pagePad * 1.4),
                               TextField(
                                 controller: _studentIdController,
                                 decoration: InputDecoration(
@@ -350,7 +368,7 @@ class _MemberFormState extends State<MemberForm> {
                                   ),
                                 ),
                               ),
-                              SizedBox(height: 20),
+                              SizedBox(height: pagePad * 1.4),
                               TextField(
                                 controller: _deptController,
                                 decoration: InputDecoration(
@@ -388,7 +406,7 @@ class _MemberFormState extends State<MemberForm> {
                                   ),
                                 ),
                               ),
-                              SizedBox(height: 20),
+                              SizedBox(height: pagePad * 1.4),
                               TextField(
                                 controller: _batchController,
                                 keyboardType: TextInputType.number,
@@ -427,7 +445,7 @@ class _MemberFormState extends State<MemberForm> {
                                   ),
                                 ),
                               ),
-                              SizedBox(height: 20),
+                              SizedBox(height: pagePad * 1.4),
                               TextField(
                                 controller: _emailController,
                                 decoration: InputDecoration(
@@ -465,7 +483,7 @@ class _MemberFormState extends State<MemberForm> {
                                   ),
                                 ),
                               ),
-                              SizedBox(height: 20),
+                              SizedBox(height: pagePad * 1.4),
                               TextField(
                                 controller: _phoneController,
                                 keyboardType: TextInputType.phone,
@@ -504,7 +522,7 @@ class _MemberFormState extends State<MemberForm> {
                                   ),
                                 ),
                               ),
-                              SizedBox(height: 20),
+                              SizedBox(height: pagePad * 1.4),
 
                               TextField(
                                 controller: _genderController,
@@ -532,7 +550,7 @@ class _MemberFormState extends State<MemberForm> {
                                 ),
                                 onTap: pickGender,
                               ),
-                              SizedBox(height: 20),
+                              SizedBox(height: pagePad * 1.4),
 
                               TextField(
                                 controller: _bloodController,
@@ -561,7 +579,7 @@ class _MemberFormState extends State<MemberForm> {
 
                                 onTap: pickBloodGroup,
                               ),
-                              SizedBox(height: 20),
+                              SizedBox(height: pagePad * 1.4),
                               TextField(
                                 controller: _addressController,
                                 decoration: InputDecoration(
@@ -599,7 +617,7 @@ class _MemberFormState extends State<MemberForm> {
                                   ),
                                 ),
                               ),
-                              SizedBox(height: 20),
+                              SizedBox(height: pagePad * 1.4),
                               TextField(
                                 controller: _passwordController,
                                 obscureText: true,
@@ -638,7 +656,7 @@ class _MemberFormState extends State<MemberForm> {
                                   ),
                                 ),
                               ),
-                              SizedBox(height: 20),
+                              SizedBox(height: pagePad * 1.4),
                               TextField(
                                 controller: _confirmPassController,
                                 obscureText: true,
@@ -677,7 +695,7 @@ class _MemberFormState extends State<MemberForm> {
                                   ),
                                 ),
                               ),
-                              SizedBox(height: 35),
+                              SizedBox(height: pagePad * 2.4),
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Color.fromARGB(
@@ -687,7 +705,10 @@ class _MemberFormState extends State<MemberForm> {
                                     198,
                                   ),
                                   foregroundColor: Colors.white,
-                                  minimumSize: Size(400, 50),
+                                  minimumSize: Size(
+                                    double.infinity,
+                                    (width * 0.13).clamp(46.0, 56.0),
+                                  ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10),
                                   ),
@@ -695,7 +716,7 @@ class _MemberFormState extends State<MemberForm> {
                                 onPressed: submitForm,
                                 child: Text(
                                   "Continue to Payment →",
-                                  style: TextStyle(fontSize: 20),
+                                  style: TextStyle(fontSize: sectionSize),
                                 ),
                               ),
                             ],

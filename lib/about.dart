@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class AboutPage extends StatelessWidget {
+class AboutPage extends StatefulWidget {
   const AboutPage({super.key});
+
+  @override
+  State<AboutPage> createState() => _AboutPageState();
+}
+
+class _AboutPageState extends State<AboutPage> {
+  bool showAll = false;
+
   Widget simpleCard(
     BuildContext context,
     String title,
@@ -20,13 +28,17 @@ class AboutPage extends StatelessWidget {
         color: Colors.white.withAlpha(230),
         borderRadius: BorderRadius.circular(12),
         boxShadow: const [
-          BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(2, 3)),
+          BoxShadow(
+            color: Color.fromARGB(66, 0, 0, 0),
+            blurRadius: 4,
+            offset: Offset(2, 3),
+          ),
         ],
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 26, color: Colors.blueGrey),
+          Icon(icon, size: 26, color: const Color.fromARGB(255, 84, 110, 122)),
           const SizedBox(height: 6),
           Text(
             title,
@@ -34,7 +46,7 @@ class AboutPage extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Colors.blueGrey.shade800,
+              color: const Color.fromARGB(255, 55, 71, 79),
             ),
           ),
           if (description != null) ...[
@@ -42,13 +54,82 @@ class AboutPage extends StatelessWidget {
             Text(
               description,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: Colors.blueGrey.shade600),
+              style: TextStyle(
+                fontSize: 13,
+                color: const Color.fromARGB(255, 84, 110, 122),
+              ),
             ),
           ],
         ],
       ),
     );
   }
+
+  final List<Map<String, Object>> allEvents = [
+    {
+      'icon': Icons.food_bank,
+      'title': 'Iftar Sharing',
+      'time': '5:30 PM - 7:30 PM',
+      'cta': 'Join',
+      'iconColor': Color.fromARGB(255, 144, 202, 249),
+    },
+    {
+      'icon': Icons.emoji_people,
+      'title': 'Winter Clothes Drive',
+      'time': '',
+      'cta': 'Join',
+      'iconColor': Color.fromARGB(255, 129, 199, 132),
+    },
+    {
+      'icon': Icons.brush,
+      'title': 'Art Competition',
+      'time': '10:00 AM - 3:00 PM',
+      'cta': 'Join',
+      'iconColor': Color.fromARGB(255, 248, 165, 140),
+    },
+    {
+      'icon': Icons.restaurant,
+      'title': 'Food Stalls',
+      'time': '11:00 AM - 5:00 PM',
+      'cta': 'Join',
+      'iconColor': Color.fromARGB(255, 186, 104, 200),
+    },
+    {
+      'icon': Icons.water_damage,
+      'title': 'Flood Relief Program',
+      'time': '',
+      'cta': 'Join',
+      'iconColor': Color.fromARGB(255, 79, 195, 247),
+    },
+    {
+      'icon': Icons.directions_bike,
+      'title': 'Raincoat for Rickshaw Heroes',
+      'time': '9:00 AM',
+      'cta': 'Join',
+      'iconColor': Color.fromARGB(255, 144, 164, 174),
+    },
+    {
+      'icon': Icons.local_hospital,
+      'title': 'Health Support for Major Diseases',
+      'time': '9:00 AM - 2:00 PM',
+      'cta': 'Join',
+      'iconColor': Color.fromARGB(255, 223, 78, 78),
+    },
+    {
+      'icon': Icons.movie,
+      'title': 'Film Festival',
+      'time': '6:00 PM - 10:00 PM',
+      'cta': 'Join',
+      'iconColor': Color.fromARGB(255, 239, 154, 154),
+    },
+    {
+      'icon': Icons.park,
+      'title': 'Tree Plantation',
+      'time': '7:00 AM - 12:00 PM',
+      'cta': 'Join',
+      'iconColor': Color.fromARGB(255, 102, 187, 106),
+    },
+  ];
 
   Future<void> openLink(String url) async {
     final Uri uri = Uri.parse(url);
@@ -57,6 +138,12 @@ class AboutPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+
+    final double pagePad = width * 0.04;
+    final double titleSize = width * 0.09;
+    final double sectionSize = width * 0.055;
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -165,39 +252,112 @@ class AboutPage extends StatelessWidget {
 
                       const SizedBox(height: 25),
 
-                      Text(
-                        "Main Events",
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blueGrey.shade800,
+                      // ================= ALL EVENTS =================
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Our All Events',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blueGrey.shade800,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  showAll = !showAll;
+                                });
+                              },
+                              child: Text(
+                                showAll ? 'Show Less' : 'View All',
+                                style: TextStyle(fontSize: sectionSize * 0.7),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
 
-                      const SizedBox(height: 10),
+                      SizedBox(height: pagePad * 0.8),
 
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        children: [
-                          simpleCard(
-                            context,
-                            "Iftar Sharing",
-                            Icons.restaurant,
-                          ),
-                          simpleCard(context, "Film Festival", Icons.movie),
-                          simpleCard(context, "Art Competition", Icons.brush),
-                          simpleCard(context, "Food Stalls", Icons.fastfood),
-                          simpleCard(
-                            context,
-                            "Blood & Vaccination Campaign",
-                            Icons.bloodtype,
-                          ),
-                          simpleCard(
-                            context,
-                            "Winter Clothes Distribution",
-                            Icons.ac_unit,
-                          ),
-                        ],
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          children: (showAll ? allEvents : allEvents.take(3))
+                              .map((event) {
+                                final color = event['iconColor'] as Color;
+                                final IconData iconData =
+                                    event['icon'] as IconData;
+
+                                return Container(
+                                  margin: EdgeInsets.only(
+                                    bottom: pagePad * 0.8,
+                                  ),
+                                  padding: EdgeInsets.all(pagePad * 0.9),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withAlpha(220),
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: width * 0.13,
+                                        height: width * 0.13,
+                                        decoration: BoxDecoration(
+                                          color: color,
+                                          borderRadius: BorderRadius.circular(
+                                            14,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          iconData,
+                                          color: Colors.white,
+                                          size: sectionSize,
+                                        ),
+                                      ),
+                                      SizedBox(width: pagePad * 0.8),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              event['title'] as String,
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: sectionSize * 0.75,
+                                              ),
+                                            ),
+                                            Text(
+                                              event['time'] as String,
+                                              style: TextStyle(
+                                                fontSize: sectionSize * 0.65,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {},
+                                        style: TextButton.styleFrom(
+                                          foregroundColor: color,
+                                        ),
+                                        child: Text(
+                                          'Details',
+                                          style: TextStyle(
+                                            fontSize: sectionSize * 0.7,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              })
+                              .toList(),
+                        ),
                       ),
 
                       const SizedBox(height: 25),
@@ -303,13 +463,23 @@ class AboutPage extends StatelessWidget {
                                 children: [
                                   Icon(
                                     Icons.facebook,
-                                    color: Colors.blueGrey.shade800,
+                                    color: const Color.fromARGB(
+                                      255,
+                                      55,
+                                      71,
+                                      79,
+                                    ),
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
                                     "facebook.com/lussc",
                                     style: TextStyle(
-                                      color: Colors.blueGrey.shade800,
+                                      color: const Color.fromARGB(
+                                        255,
+                                        55,
+                                        71,
+                                        79,
+                                      ),
                                       decoration: TextDecoration.underline,
                                     ),
                                   ),
@@ -328,13 +498,23 @@ class AboutPage extends StatelessWidget {
                                 children: [
                                   Icon(
                                     Icons.email,
-                                    color: Colors.blueGrey.shade800,
+                                    color: const Color.fromARGB(
+                                      255,
+                                      55,
+                                      71,
+                                      79,
+                                    ),
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
                                     "lussc@gmail.com",
                                     style: TextStyle(
-                                      color: Colors.blueGrey.shade800,
+                                      color: const Color.fromARGB(
+                                        255,
+                                        55,
+                                        71,
+                                        79,
+                                      ),
                                       decoration: TextDecoration.underline,
                                     ),
                                   ),

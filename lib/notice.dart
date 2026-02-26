@@ -1,4 +1,7 @@
 import "package:flutter/material.dart";
+import 'package:donation_app/admin/event_management.dart';
+import 'package:donation_app/after_join_event.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Notice extends StatefulWidget {
   const Notice({super.key});
@@ -9,8 +12,15 @@ class Notice extends StatefulWidget {
 
 class _NoticeState extends State<Notice> {
   bool showClub = true; // default selected
-  bool isMember = false; // change to true to test member access
   int expandedIndex = -1;
+
+  // Check if current user is logged in as a member (@lussc.local email)
+  bool get isMember {
+    final session = Supabase.instance.client.auth.currentSession;
+    if (session == null) return false;
+    final email = session.user.email ?? '';
+    return email.endsWith('@lussc.local');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -201,77 +211,92 @@ class _NoticeState extends State<Notice> {
     );
   }
 
-  // Club Notices
+  // Club Notices — show events from eventStore as simple notices
   Widget clubNotices() {
-    return ListView(
+    final events = eventStore.where((e) => e['status'] == 'Active').toList();
+
+    if (events.isEmpty) {
+      return const Center(
+        child: Text(
+          'No notices yet.',
+          style: TextStyle(color: Colors.black54, fontSize: 16),
+        ),
+      );
+    }
+
+    return ListView.builder(
       padding: const EdgeInsets.all(16),
-      children: [
-        noticeCard(
-          index: 0,
-          tag: "IMPORTANT",
-          tagColor: Colors.orange,
-          title: "Winter Clothes Drive",
-          description:
-              "Help collect warm clothes for those in need during winter.",
-          fullDescription:
-              "We are organizing a winter clothes drive to support underprivileged families. Please donate sweaters, jackets, blankets and warm clothing items at our collection center before April 20.",
-          date: "Apr 20, 2025",
-          isNew: true,
-        ),
+      itemCount: events.length,
+      itemBuilder: (context, index) {
+        final event = events[index];
+        final String title = event['title'] as String? ?? '';
+        final String date = event['date'] as String? ?? '';
+        final String time = event['timeDisplay'] as String? ?? '';
+        final String location = event['location'] as String? ?? '';
+        final String description = event['description'] as String? ?? '';
+        final String status = event['status'] as String? ?? 'Active';
+        final String notice = event['notice'] as String? ?? '';
 
-        noticeCard(
-          index: 1,
-          tag: "EVENT",
-          tagColor: Colors.green,
-          title: "Blood Donation Camp",
-          description: "Join our blood donation camp and help save lives.",
-          fullDescription:
-              "This event will be held at the university auditorium. Doctors and medical staff will be present.",
-          date: "Apr 27, 2025",
-          time: "9 AM - 2 PM",
-        ),
+        // Tag color based on status
+        final Color tagColor = status == 'Active' ? Colors.green : Colors.red;
+        final String tag = status == 'Active' ? 'EVENT' : 'CLOSED';
 
-        noticeCard(
-          index: 2,
-          tag: "NOTICE",
-          tagColor: Colors.blue,
-          title: "Monthly Impact Report",
-          description: "Read about our achievements and activities this month.",
-          fullDescription: "",
-          date: "Apr 10, 2025",
-        ),
-      ],
+        return noticeCard(
+          index: index,
+          tag: tag,
+          tagColor: tagColor,
+          title: title,
+          description: notice.isNotEmpty ? notice : description,
+          fullDescription: description,
+          date: date,
+          time: time.isNotEmpty ? time : null,
+          isNew: status == 'Active',
+        );
+      },
     );
   }
 
-  // Members Notices
+  // Members Notices — show events with Join button, only for members
   Widget memberNotices() {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        noticeCard(
-          index: 0,
-          tag: "INTERNAL",
-          tagColor: Colors.purple,
-          title: "Volunteer Duty List ",
-          description: "Check your assigned volunteer responsibilities.",
-          fullDescription: "",
-          date: "Apr 18, 2024",
-        ),
+    final events = eventStore.where((e) => e['status'] == 'Active').toList();
 
-        noticeCard(
-          index: 1,
-          tag: "MEETING",
-          tagColor: Colors.red,
-          title: "Internal Meeting",
-          description: "Next internal meeting scheduled for Sunday.",
-          date: "Apr 21, 2024",
-          time: "4 PM",
-          fullDescription:
-              "As all know our upcoming event is 'Iftar sharing'. For event organization all members are requested to present at the gallery-1",
-          isNew: true,
+    if (events.isEmpty) {
+      return const Center(
+        child: Text(
+          'No member notices yet.',
+          style: TextStyle(color: Colors.black54, fontSize: 16),
         ),
-      ],
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: events.length,
+      itemBuilder: (context, index) {
+        final event = events[index];
+        final String title = event['title'] as String? ?? '';
+        final String date = event['date'] as String? ?? '';
+        final String time = event['timeDisplay'] as String? ?? '';
+        final String description = event['description'] as String? ?? '';
+        final String status = event['status'] as String? ?? 'Active';
+        final String notice = event['notice'] as String? ?? '';
+
+        final Color tagColor = status == 'Active' ? Colors.green : Colors.red;
+        final String tag = status == 'Active' ? 'EVENT' : 'CLOSED';
+
+        return memberNoticeCard(
+          event: event,
+          index: index,
+          tag: tag,
+          tagColor: tagColor,
+          title: title,
+          description: notice.isNotEmpty ? notice : description,
+          fullDescription: description,
+          date: date,
+          time: time.isNotEmpty ? time : null,
+          isNew: status == 'Active',
+        );
+      },
     );
   }
 
@@ -390,6 +415,154 @@ class _NoticeState extends State<Notice> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Member Notice Card — same as noticeCard but with a Join button
+  Widget memberNoticeCard({
+    required Map<String, dynamic> event,
+    required int index,
+    required String tag,
+    required Color tagColor,
+    required String title,
+    required String description,
+    required String fullDescription,
+    required String date,
+    String? time,
+    bool isNew = false,
+  }) {
+    bool isExpanded = expandedIndex == index;
+    final String status = event['status'] as String? ?? 'Active';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(20),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Tag Row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  color: tagColor,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  tag,
+                  style: const TextStyle(color: Colors.white, fontSize: 12),
+                ),
+              ),
+              if (isNew)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.orange,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    "NEW",
+                    style: TextStyle(color: Colors.white, fontSize: 11),
+                  ),
+                ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          Text(
+            title,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+
+          const SizedBox(height: 6),
+
+          Text(
+            isExpanded && fullDescription.isNotEmpty
+                ? fullDescription
+                : description,
+            style: const TextStyle(color: Colors.black54),
+          ),
+
+          const SizedBox(height: 12),
+
+          Row(
+            children: [
+              const Icon(Icons.calendar_today, size: 16),
+              const SizedBox(width: 6),
+              Text(time == null ? date : "$date . $time"),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Read more
+              if (fullDescription.isNotEmpty)
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      if (isExpanded) {
+                        expandedIndex = -1;
+                      } else {
+                        expandedIndex = index;
+                      }
+                    });
+                  },
+                  child: Text(
+                    isExpanded ? "Read less ←" : "Read more →",
+                    style: const TextStyle(
+                      color: Colors.blue,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+
+              // Join button — only for active events
+              if (status == 'Active')
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => AfterJoinEventPage(event: event),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: const Text('Join'),
                 ),
             ],
           ),

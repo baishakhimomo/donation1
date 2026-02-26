@@ -1,8 +1,12 @@
 import 'dart:async';
 import 'package:donation_app/about.dart';
+import 'package:donation_app/admin/event_management.dart';
+import 'package:donation_app/after_join_event.dart';
+import 'package:donation_app/authentication/auth.dart';
 import 'package:donation_app/blood.dart';
 import 'package:donation_app/cloth_page.dart';
 import 'package:donation_app/food_page.dart';
+import 'package:donation_app/logOut.dart';
 import 'package:donation_app/mem_login.dart';
 import 'package:donation_app/member_form.dart';
 import 'package:donation_app/money_don.dart';
@@ -32,98 +36,7 @@ class _HomePageState extends State<HomePage> {
     'assets/winterpic.jpeg',
   ];
 
-  final List<Map<String, dynamic>> activeEvents = [
-    {
-      'icon': Icons.food_bank,
-      'title': 'Iftar Sharing',
-      'time': 'Feb 12 · 5:30 PM',
-      'cta': 'Join',
-      'cardColor': Color.fromARGB(255, 164, 73, 160),
-      'iconColor': Color.fromARGB(255, 164, 73, 160),
-    },
-    {
-      'icon': Icons.set_meal,
-      'title': 'Food Stalls',
-      'time': 'Feb 15 · 11:00 AM',
-      'cta': 'Join',
-      'cardColor': Color.fromARGB(255, 113, 212, 116),
-      'iconColor': Color.fromARGB(255, 113, 212, 116),
-    },
-    {
-      'icon': Icons.bloodtype,
-      'title': 'Blood Donation',
-      'time': 'Feb 22 · 9:00 AM',
-      'cta': 'Join',
-      'cardColor': Color.fromARGB(255, 224, 79, 69),
-      'iconColor': Color.fromARGB(255, 224, 79, 69),
-    },
-  ];
-
-  final List<Map<String, Object>> allEvents = [
-    {
-      'icon': Icons.food_bank,
-      'title': 'Iftar Sharing',
-      'time': '5:30 PM - 7:30 PM',
-      'cta': 'Join',
-      'iconColor': Color.fromARGB(255, 144, 202, 249),
-    },
-    {
-      'icon': Icons.emoji_people,
-      'title': 'Winter Clothes Drive',
-      'time': '',
-      'cta': 'Join',
-      'iconColor': Color.fromARGB(255, 129, 199, 132),
-    },
-    {
-      'icon': Icons.brush,
-      'title': 'Art Competition',
-      'time': '10:00 AM - 3:00 PM',
-      'cta': 'Join',
-      'iconColor': Color.fromARGB(255, 248, 165, 140),
-    },
-    {
-      'icon': Icons.restaurant,
-      'title': 'Food Stalls',
-      'time': '11:00 AM - 5:00 PM',
-      'cta': 'Join',
-      'iconColor': Color.fromARGB(255, 186, 104, 200),
-    },
-    {
-      'icon': Icons.water_damage,
-      'title': 'Flood Relief Program',
-      'time': '',
-      'cta': 'Join',
-      'iconColor': Color.fromARGB(255, 79, 195, 247),
-    },
-    {
-      'icon': Icons.directions_bike,
-      'title': 'Raincoat for Rickshaw Heroes',
-      'time': '9:00 AM',
-      'cta': 'Join',
-      'iconColor': Color.fromARGB(255, 144, 164, 174),
-    },
-    {
-      'icon': Icons.local_hospital,
-      'title': 'Health Support for Major Diseases',
-      'time': '9:00 AM - 2:00 PM',
-      'cta': 'Join',
-      'iconColor': Color.fromARGB(255, 223, 78, 78),
-    },
-    {
-      'icon': Icons.movie,
-      'title': 'Film Festival',
-      'time': '6:00 PM - 10:00 PM',
-      'cta': 'Join',
-      'iconColor': Color.fromARGB(255, 239, 154, 154),
-    },
-    {
-      'icon': Icons.park,
-      'title': 'Tree Plantation',
-      'time': '7:00 AM - 12:00 PM',
-      'cta': 'Join',
-      'iconColor': Color.fromARGB(255, 102, 187, 106),
-    },
-  ];
+  List<Map<String, dynamic>> get activeEvents => getActiveEvents();
 
   @override
   void initState() {
@@ -179,9 +92,28 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void logOut() async {
+    await Auth().signOut();
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LogOutPage()),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = MediaQuery.sizeOf(context).width;
+    final topInset = MediaQuery.of(context).padding.top;
+
+    final double pagePad = width * 0.04;
+    final double titleSize = width * 0.09;
+    final double sectionSize = width * 0.055;
+
+    final double headerHeight = width * 0.15;
+    final double headerTop = topInset + pagePad;
+    final double contentTop = headerTop + headerHeight + pagePad;
 
     return Scaffold(
       body: Stack(
@@ -193,8 +125,16 @@ class _HomePageState extends State<HomePage> {
           // ================= HEADER =================
           SafeArea(
             child: Container(
-              margin: const EdgeInsets.only(top: 16, left: 16, right: 16),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              height: headerHeight,
+              margin: EdgeInsets.only(
+                top: pagePad,
+                left: pagePad,
+                right: pagePad,
+              ),
+              padding: EdgeInsets.symmetric(
+                horizontal: pagePad * 0.6,
+                vertical: pagePad * 0.5,
+              ),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(18),
@@ -208,11 +148,14 @@ class _HomePageState extends State<HomePage> {
               ),
               child: Row(
                 children: [
-                  Image.asset('assets/logo.jpeg', width: 36),
-                  const SizedBox(width: 10),
-                  const Text(
+                  Image.asset('assets/logo.jpeg', width: width * 0.09),
+                  SizedBox(width: pagePad * 0.6),
+                  Text(
                     'HOME',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: titleSize * 0.68,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const Spacer(),
 
@@ -224,11 +167,11 @@ class _HomePageState extends State<HomePage> {
           ),
 
           Padding(
-            padding: const EdgeInsets.only(
-              top: 80,
-              left: 16,
-              right: 16,
-              bottom: 16,
+            padding: EdgeInsets.only(
+              top: contentTop,
+              left: pagePad,
+              right: pagePad,
+              bottom: pagePad,
             ),
             child: SingleChildScrollView(
               child: Column(
@@ -252,15 +195,17 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
 
-                  const SizedBox(height: 10),
+                  SizedBox(height: pagePad * 0.6),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       for (int i = 0; i < slides.length; i++)
                         Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          height: 8,
-                          width: _pageIndex == i ? 18 : 8,
+                          margin: EdgeInsets.symmetric(
+                            horizontal: pagePad * 0.25,
+                          ),
+                          height: width * 0.02,
+                          width: _pageIndex == i ? width * 0.045 : width * 0.02,
                           decoration: BoxDecoration(
                             color: _pageIndex == i
                                 ? Colors.blue
@@ -271,15 +216,18 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
 
-                  const SizedBox(height: 20),
+                  SizedBox(height: pagePad * 1.2),
 
                   // ================= MAIN WORK =================
-                  const Text(
+                  Text(
                     'Our Main Work',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: titleSize * 0.62,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
 
-                  const SizedBox(height: 12),
+                  SizedBox(height: pagePad * 0.8),
 
                   Row(
                     children: [
@@ -288,7 +236,7 @@ class _HomePageState extends State<HomePage> {
                         Icons.checkroom,
                         const Color.fromARGB(255, 144, 202, 249),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: pagePad * 0.8),
                       mainWorkCard(
                         'Food',
                         Icons.restaurant,
@@ -297,7 +245,7 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
 
-                  const SizedBox(height: 12),
+                  SizedBox(height: pagePad * 0.8),
 
                   Row(
                     children: [
@@ -306,7 +254,7 @@ class _HomePageState extends State<HomePage> {
                         Icons.bloodtype,
                         const Color.fromARGB(255, 239, 154, 154),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: pagePad * 0.8),
                       mainWorkCard(
                         'Money',
                         Icons.monetization_on,
@@ -315,198 +263,159 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
 
-                  const SizedBox(height: 24),
+                  SizedBox(height: pagePad * 1.6),
 
                   // ================= ACTIVE EVENTS =================
-                  const Text(
+                  Text(
                     'Active Events',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  SizedBox(
-                    height: 170,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: activeEvents.map((event) {
-                        final Color baseColor = event['cardColor'] as Color;
-                        final IconData iconData = event['icon'] as IconData;
-
-                        return Container(
-                          width: 220,
-                          margin: const EdgeInsets.only(right: 12),
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.bottomLeft,
-                              end: Alignment.topRight,
-                              colors: [baseColor.withAlpha(80), baseColor],
-                            ),
-                            borderRadius: BorderRadius.circular(18),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withAlpha(30),
-                                blurRadius: 10,
-                                offset: const Offset(0, 6),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              CircleAvatar(
-                                backgroundColor: baseColor,
-                                child: Icon(iconData, color: Colors.white),
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              Text(
-                                event['title'] as String,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                ),
-                              ),
-
-                              const SizedBox(height: 6),
-
-                              Text(
-                                event['time'] as String,
-                                style: const TextStyle(color: Colors.white),
-                              ),
-
-                              const Spacer(),
-
-                              Align(
-                                alignment: Alignment.bottomRight,
-                                child: ElevatedButton(
-                                  onPressed: () {},
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: baseColor.withAlpha(230),
-                                  ),
-                                  child: Text(
-                                    event['cta'] as String,
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
+                    style: TextStyle(
+                      fontSize: titleSize * 0.62,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  SizedBox(height: pagePad * 0.8),
 
-                  // ================= ALL EVENTS =================
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'All Events',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            showAll = !showAll;
-                          });
-                        },
-                        child: Text(showAll ? 'Show Less' : 'View All'),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  Column(
-                    children: (showAll ? allEvents : allEvents.take(3)).map((
-                      event,
-                    ) {
-                      final color = event['iconColor'] as Color;
-                      final IconData iconData = event['icon'] as IconData;
-
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withAlpha(220),
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                color: color,
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              child: Icon(iconData, color: Colors.white),
+                  activeEvents.isEmpty
+                      ? Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.all(pagePad * 2),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withAlpha(180),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Text(
+                            'No active events right now.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.black54,
+                              fontSize: sectionSize * 0.8,
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    event['title'] as String,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                          ),
+                        )
+                      : SizedBox(
+                          height: width * 0.45,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            children: activeEvents.map((event) {
+                              final Color baseColor =
+                                  event['cardColor'] as Color;
+                              final IconData iconData =
+                                  event['icon'] as IconData;
+
+                              return Container(
+                                width: width * 0.56,
+                                margin: EdgeInsets.only(right: pagePad * 0.8),
+                                padding: EdgeInsets.all(pagePad * 0.9),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.bottomLeft,
+                                    end: Alignment.topRight,
+                                    colors: [
+                                      baseColor.withAlpha(80),
+                                      baseColor,
+                                    ],
                                   ),
-                                  Text(event['time'] as String),
-                                ],
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {},
-                              style: TextButton.styleFrom(
-                                foregroundColor: color,
-                              ),
-                              child: const Text('Details'),
-                            ),
-                          ],
+                                  borderRadius: BorderRadius.circular(18),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withAlpha(30),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 6),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    CircleAvatar(
+                                      backgroundColor: baseColor,
+                                      child: Icon(
+                                        iconData,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    SizedBox(height: pagePad * 0.8),
+                                    Text(
+                                      event['title'] as String,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: sectionSize * 0.8,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    SizedBox(height: pagePad * 0.4),
+                                    Text(
+                                      event['date'] as String,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: sectionSize * 0.7,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Align(
+                                      alignment: Alignment.bottomRight,
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  AfterJoinEventPage(
+                                                    event: event,
+                                                  ),
+                                            ),
+                                          );
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: baseColor.withAlpha(
+                                            230,
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          'Join',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          ),
                         ),
-                      );
-                    }).toList(),
-                  ),
 
-                  const SizedBox(height: 24),
+                  SizedBox(height: pagePad * 1.6),
 
                   // ================= SPONSOR =================
                   Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.all(18),
+                    margin: EdgeInsets.only(bottom: pagePad),
+                    padding: EdgeInsets.all(pagePad * 1.1),
                     decoration: BoxDecoration(
                       color: Colors.white.withAlpha(220),
                       borderRadius: BorderRadius.circular(18),
                     ),
                     child: Row(
                       children: [
-                        const Expanded(
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 'Sponsor Now',
                                 style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: titleSize * 0.62,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.blue,
                                 ),
                               ),
-                              SizedBox(height: 6),
+                              SizedBox(height: pagePad * 0.4),
                               Text(
                                 'Support our activities and help us grow.',
-                                style: TextStyle(color: Colors.black54),
+                                style: TextStyle(
+                                  color: Colors.black54,
+                                  fontSize: sectionSize * 0.7,
+                                ),
                               ),
                             ],
                           ),
@@ -523,7 +432,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  SizedBox(height: pagePad * 1.2),
                 ],
               ),
             ),
@@ -538,7 +447,7 @@ class _HomePageState extends State<HomePage> {
       child: GestureDetector(
         onTap: () => mainWorkClick(title),
         child: Container(
-          height: 110,
+          height: MediaQuery.sizeOf(context).width * 0.28,
           decoration: BoxDecoration(
             color: Colors.white.withAlpha(220),
             borderRadius: BorderRadius.circular(16),
@@ -554,16 +463,26 @@ class _HomePageState extends State<HomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 50,
-                height: 50,
+                width: MediaQuery.sizeOf(context).width * 0.13,
+                height: MediaQuery.sizeOf(context).width * 0.13,
                 decoration: BoxDecoration(
                   color: color,
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(icon, color: Colors.white),
+                child: Icon(
+                  icon,
+                  color: Colors.white,
+                  size: MediaQuery.sizeOf(context).width * 0.055,
+                ),
               ),
               const SizedBox(height: 8),
-              Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                title,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: MediaQuery.sizeOf(context).width * 0.045,
+                ),
+              ),
             ],
           ),
         ),
@@ -604,9 +523,11 @@ class _HomePageState extends State<HomePage> {
               MaterialPageRoute(builder: (context) => Login()),
             );
             break;
-          // case 'Logout':
-          //   print("Logged out");
-          //   break;
+
+          case 'Logout':
+            logOut();
+
+            break;
 
           // Subpages example under Home
           // case 'Blood Donation':
@@ -643,7 +564,7 @@ class _HomePageState extends State<HomePage> {
 
           // const PopupMenuItem(value: 'Profile', child: Text('Profile')),
           const PopupMenuItem(value: 'Login', child: Text('Login')),
-          // const PopupMenuItem(value: 'Logout', child: Text('Logout')),
+          const PopupMenuItem(value: 'Logout', child: Text('Logout')),
         ];
       },
     );

@@ -1,4 +1,5 @@
 import 'package:donation_app/home_page.dart';
+import 'package:donation_app/mem_login.dart';
 import 'package:flutter/material.dart';
 
 class LogOutPage extends StatelessWidget {
@@ -37,17 +38,20 @@ class LogOutPage extends StatelessWidget {
                   const Text(
                     'Thank you for using the LUSSC app. We hope to see you again soon!',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16, color: Colors.black54),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Color.fromARGB(137, 0, 0, 0),
+                    ),
                   ),
                   const SizedBox(height: 24),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        //   Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(builder: (context) => HomePage()),
-                        //   );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Login()),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(255, 232, 93, 54),

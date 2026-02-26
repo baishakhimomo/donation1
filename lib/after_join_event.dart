@@ -185,20 +185,22 @@ class _AfterJoinEventPageState extends State<AfterJoinEventPage> {
                           ),
                         ),
                       ),
-                      TextButton.icon(
-                        onPressed: _showEditDialog,
-                        icon: const Icon(Icons.edit, size: 18),
-                        label: const Text('Edit'),
-                      ),
-                      const SizedBox(width: 6),
-                      ElevatedButton.icon(
-                        onPressed: _toggleStatus,
-                        icon: Icon(
-                          _isActive ? Icons.close : Icons.check,
-                          size: 18,
+                      if (widget.onEventUpdated != null) ...[
+                        TextButton.icon(
+                          onPressed: _showEditDialog,
+                          icon: const Icon(Icons.edit, size: 18),
+                          label: const Text('Edit'),
                         ),
-                        label: Text(_isActive ? 'Close' : 'Activate'),
-                      ),
+                        const SizedBox(width: 6),
+                        ElevatedButton.icon(
+                          onPressed: _toggleStatus,
+                          icon: Icon(
+                            _isActive ? Icons.close : Icons.check,
+                            size: 18,
+                          ),
+                          label: Text(_isActive ? 'Close' : 'Activate'),
+                        ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -245,9 +247,20 @@ class _AfterJoinEventPageState extends State<AfterJoinEventPage> {
                         ],
                         if (location.isNotEmpty) ...[
                           const SizedBox(height: 6),
-                          Text(
-                            location,
-                            style: const TextStyle(color: Colors.black54),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.location_on,
+                                size: 18,
+                                color: Colors.black54,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                location,
+                                style: const TextStyle(color: Colors.black54),
+                              ),
+                            ],
                           ),
                         ],
                         const SizedBox(height: 10),
@@ -381,29 +394,6 @@ class _AfterJoinEventPageState extends State<AfterJoinEventPage> {
                             ),
                           );
                         }),
-                        if (notice.trim().isNotEmpty)
-                          Container(
-                            margin: const EdgeInsets.only(top: 6),
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(Icons.campaign, color: badgeColor),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    notice,
-                                    style: const TextStyle(
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
                       ],
                     ),
                   ),

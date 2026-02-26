@@ -14,24 +14,74 @@ class Auth {
   }) async {
     final email = "$studentId@lussc.local"; // fake internal email
 
-    // 1️⃣ CREATE AUTH USER
-    final authRes = await _supabase.auth.signUp(
-      email: email,
-      password: password,
-    );
-    final user = authRes.user;
-    if (user == null) throw Exception("Signup failed");
+    // If this student_id is already in members table, don't try to sign up again.
+    final existingMember = await _supabase
+        .from('members')
+        .select('student_id')
+        .eq('student_id', studentId)
+        .maybeSingle();
+    if (existingMember != null) {
+      throw Exception('This Student ID is already registered. Please login.');
+    }
 
-    // 2️⃣ SAVE MEMBER INFO
-    await _supabase.from('members').insert({
-      'id': user.id,
-      'student_id': studentId,
-      'name': name,
-      'department': department,
-      'batch': batch,
-      'contact_email': contactEmail,
-      'is_approved': false, // admin approval pending
-    });
+    // 1️⃣ CREATE AUTH USER
+    try {
+      final authRes = await _supabase.auth.signUp(
+        email: email,
+        password: password,
+      );
+      final user = authRes.user;
+      if (user == null) throw Exception('Signup failed');
+
+      // 2️⃣ SAVE MEMBER INFO
+      await _supabase.from('members').insert({
+        'id': user.id,
+        'student_id': studentId,
+        'name': name,
+        'department': department,
+        'batch': batch,
+        'contact_email': contactEmail,
+        'is_approved': false, // admin approval pending
+      });
+      return;
+    } on AuthException catch (e) {
+      final msg = e.message.toLowerCase();
+
+      // Sometimes auth user was created earlier, but members row wasn't saved.
+      // In that case, try to sign in and then create the members row.
+      if (msg.contains('already') || msg.contains('exists') || msg.contains('registered')) {
+        try {
+          await _supabase.auth.signInWithPassword(email: email, password: password);
+          final user = _supabase.auth.currentUser;
+          if (user == null) {
+            throw Exception('This Student ID is already registered. Please login.');
+          }
+
+          final memberRow = await _supabase
+              .from('members')
+              .select('student_id')
+              .eq('student_id', studentId)
+              .maybeSingle();
+
+          if (memberRow == null) {
+            await _supabase.from('members').insert({
+              'id': user.id,
+              'student_id': studentId,
+              'name': name,
+              'department': department,
+              'batch': batch,
+              'contact_email': contactEmail,
+              'is_approved': false,
+            });
+          }
+          return;
+        } catch (_) {
+          throw Exception('This Student ID is already registered. Please login.');
+        }
+      }
+
+      throw Exception(e.message);
+    }
   }
 
   // ================= MEMBER LOGIN =================

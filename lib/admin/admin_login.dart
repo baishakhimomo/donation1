@@ -1,30 +1,25 @@
-import 'package:donation_app/admin/admin_approval.dart';
-import 'package:donation_app/admin/admin_login.dart';
-import 'package:donation_app/authentication/auth.dart';
-import 'package:donation_app/donor_signUP.dart';
-import 'package:donation_app/home_page.dart';
-import 'package:donation_app/mem_login.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:donation_app/admin/admin_approval.dart';
 
-class DonorLogin extends StatefulWidget {
-  const DonorLogin({super.key});
+final supabase = Supabase.instance.client;
+
+class AdminLoginPage extends StatefulWidget {
+  const AdminLoginPage({super.key});
 
   @override
-  State<DonorLogin> createState() => _DonorLoginState();
+  State<AdminLoginPage> createState() => _AdminLoginPageState();
 }
 
-class _DonorLoginState extends State<DonorLogin> {
+class _AdminLoginPageState extends State<AdminLoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
-  final auth = Auth();
   bool _loading = false;
 
-  Future<void> donorLogin() async {
+  Future<void> adminLogin() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    // 1) Simple validation
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(
         context,
@@ -35,19 +30,34 @@ class _DonorLoginState extends State<DonorLogin> {
     setState(() => _loading = true);
 
     try {
-      // 2) Login using Supabase auth
-      await auth.signInDonor(email: email, password: password);
+      // 1) Sign in with Supabase Auth
+      await supabase.auth.signInWithPassword(email: email, password: password);
 
+      // 2) Check if this email is in admin_emails table
+      final adminCheck = await supabase
+          .from('admin_emails')
+          .select()
+          .eq('email', email)
+          .maybeSingle();
+
+      if (adminCheck == null) {
+        // Not an admin — sign out and show error
+        await supabase.auth.signOut();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("You are not authorized as admin")),
+        );
+        return;
+      }
+
+      // 3) Admin verified — go to Admin Approval page
       if (!mounted) return;
-
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text("Donor login successful")));
-
-      // 3) After login go where you want (for now go to main Login page or Donor home)
+      ).showSnackBar(const SnackBar(content: Text("Admin login successful")));
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const HomePage()),
+        MaterialPageRoute(builder: (_) => const AdminApprovalPage()),
       );
     } catch (e) {
       if (!mounted) return;
@@ -68,11 +78,10 @@ class _DonorLoginState extends State<DonorLogin> {
 
   @override
   Widget build(BuildContext context) {
-    final w = MediaQuery.of(context).size.width;
-
     return Scaffold(
       body: Stack(
         children: [
+          // Background
           Positioned.fill(
             child: Image.asset('assets/backg.png', fit: BoxFit.cover),
           ),
@@ -122,57 +131,22 @@ class _DonorLoginState extends State<DonorLogin> {
                           ),
                         ),
                         const Spacer(),
-                        if (w > 360) ...[
-                          _menuItem("Home"),
-                          _menuItem("About Us"),
-                          _menuItem("Events"),
-                          const SizedBox(width: 8),
-                        ],
-                        IconButton(
-                          tooltip: 'Admin Login',
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const AdminLoginPage(),
-                              ),
-                            );
-                          },
-                          icon: const Icon(
-                            Icons.admin_panel_settings,
-                            color: Color(0xFF1E6FA8),
+                        const Text(
+                          "Admin Panel",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFFF26B6B),
                           ),
-                        ),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(255, 242, 107, 107),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 10,
-                            ),
-                            elevation: 0,
-                          ),
-                          onPressed: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const AdminApprovalPage(),
-                              ),
-                            );
-                          },
-                          child: const Text("Student Login"),
                         ),
                       ],
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 10),
+                const SizedBox(height: 30),
 
+                // LOGIN FORM
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(
@@ -181,75 +155,23 @@ class _DonorLoginState extends State<DonorLogin> {
                     ),
                     child: Column(
                       children: [
+                        const Icon(
+                          Icons.admin_panel_settings,
+                          size: 80,
+                          color: Color(0xFF1E6FA8),
+                        ),
                         const SizedBox(height: 10),
-                        const Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            "Serve Humanity\nThrough\nStudent-Led Initiatives",
-                            style: TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.w800,
-                              height: 1.1,
-                              color: Color(0xFF184B6A),
-                            ),
+                        const Text(
+                          "Admin Login",
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF184B6A),
                           ),
                         ),
+                        const SizedBox(height: 20),
 
-                        const SizedBox(height: 16),
-
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton(
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: const Color(0xFF1E6FA8),
-                                  side: const BorderSide(
-                                    color: Color(0xFF1E6FA8),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  backgroundColor: Colors.white.withOpacity(
-                                    0.65,
-                                  ),
-                                ),
-                                onPressed: () {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => const Login(),
-                                    ),
-                                  );
-                                },
-                                child: const Text("For University Members"),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF1E6FA8),
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                                onPressed: () {},
-                                child: const Text("For Donors"),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 18),
-
-                        // LOGIN CARD
+                        // Login Card
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(16),
@@ -281,7 +203,7 @@ class _DonorLoginState extends State<DonorLogin> {
                                 controller: _emailController,
                                 keyboardType: TextInputType.emailAddress,
                                 decoration: InputDecoration(
-                                  hintText: "Enter your email",
+                                  hintText: "Enter admin email",
                                   prefixIcon: const Icon(Icons.email_outlined),
                                   filled: true,
                                   fillColor: const Color(0xFFF3F6F9),
@@ -306,10 +228,9 @@ class _DonorLoginState extends State<DonorLogin> {
 
                               TextField(
                                 controller: _passwordController,
-                                keyboardType: TextInputType.visiblePassword,
                                 obscureText: true,
                                 decoration: InputDecoration(
-                                  hintText: "Enter your password",
+                                  hintText: "Enter password",
                                   prefixIcon: const Icon(Icons.lock_outline),
                                   filled: true,
                                   fillColor: const Color(0xFFF3F6F9),
@@ -333,7 +254,7 @@ class _DonorLoginState extends State<DonorLogin> {
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                 ),
-                                onPressed: _loading ? null : donorLogin,
+                                onPressed: _loading ? null : adminLogin,
                                 child: _loading
                                     ? const SizedBox(
                                         height: 22,
@@ -343,36 +264,11 @@ class _DonorLoginState extends State<DonorLogin> {
                                         ),
                                       )
                                     : const Text(
-                                        "Login",
+                                        "Login as Admin",
                                         style: TextStyle(
                                           fontWeight: FontWeight.w700,
                                         ),
                                       ),
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Text("Don't have an account? "),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => const DonorSignup(),
-                                        ),
-                                      );
-                                    },
-                                    child: const Text(
-                                      "Sign Up",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ],
                               ),
                             ],
                           ),
@@ -387,20 +283,6 @@ class _DonorLoginState extends State<DonorLogin> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  static Widget _menuItem(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: Color(0xFF184B6A),
-        ),
       ),
     );
   }

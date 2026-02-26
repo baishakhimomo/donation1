@@ -339,20 +339,64 @@ class _EventManagementPageState extends State<EventManagementPage> {
             const SizedBox(height: 12),
             TextField(
               controller: _dateController,
+              readOnly: true,
               decoration: const InputDecoration(
                 labelText: 'Event Date',
-                hintText: 'Jan 10, 2026',
+                hintText: 'Tap to pick a date',
                 border: OutlineInputBorder(),
+                suffixIcon: Icon(Icons.calendar_today),
               ),
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime(2024),
+                  lastDate: DateTime(2030),
+                );
+                if (picked != null) {
+                  final months = [
+                    'Jan',
+                    'Feb',
+                    'Mar',
+                    'Apr',
+                    'May',
+                    'Jun',
+                    'Jul',
+                    'Aug',
+                    'Sep',
+                    'Oct',
+                    'Nov',
+                    'Dec',
+                  ];
+                  _dateController.text =
+                      '${months[picked.month - 1]} ${picked.day}, ${picked.year}';
+                }
+              },
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _timeController,
+              readOnly: true,
               decoration: const InputDecoration(
-                labelText: 'Time Display (for card)',
-                hintText: 'Jan 10 · 6:00 PM',
+                labelText: 'Event Time',
+                hintText: 'Tap to pick a time',
                 border: OutlineInputBorder(),
+                suffixIcon: Icon(Icons.access_time),
               ),
+              onTap: () async {
+                final picked = await showTimePicker(
+                  context: context,
+                  initialTime: TimeOfDay.now(),
+                );
+                if (picked != null) {
+                  final hour = picked.hourOfPeriod == 0
+                      ? 12
+                      : picked.hourOfPeriod;
+                  final minute = picked.minute.toString().padLeft(2, '0');
+                  final period = picked.period == DayPeriod.am ? 'AM' : 'PM';
+                  _timeController.text = '$hour:$minute $period';
+                }
+              },
             ),
             const SizedBox(height: 12),
             TextField(

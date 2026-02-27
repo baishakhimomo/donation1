@@ -58,6 +58,12 @@ class _AdminSettingsPageState extends State<AdminSettingsPage>
         ),
         backgroundColor: const Color.fromARGB(255, 30, 111, 168),
         iconTheme: const IconThemeData(color: Colors.white),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
         bottom: TabBar(
           controller: _tabCtrl,
           indicatorColor: Colors.white,

@@ -36,7 +36,7 @@ class _MemberFormState extends State<MemberForm> {
         name: _nameController.text.trim(),
         department: _deptController.text.trim(),
         batch: int.parse(_batchController.text.trim()),
-        contactEmail: _emailController.text.trim(), // THIS replaces email usage
+        contactEmail: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
@@ -55,678 +55,459 @@ class _MemberFormState extends State<MemberForm> {
     }
   }
 
-  //Gender Select Method
+  // Gender Select
   Future<void> pickGender() async {
     String? selected = await showModalBottomSheet<String>(
       context: context,
       builder: (context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: const Text("Male"),
-              onTap: () => Navigator.pop(context, "Male"),
-            ),
-            ListTile(
-              title: const Text("Female"),
-              onTap: () => Navigator.pop(context, "Female"),
-            ),
-          ],
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text("Male"),
+                onTap: () => Navigator.pop(context, "Male"),
+              ),
+              ListTile(
+                title: const Text("Female"),
+                onTap: () => Navigator.pop(context, "Female"),
+              ),
+            ],
+          ),
         );
       },
     );
 
     if (selected != null) {
-      setState(() {
-        _genderController.text = selected;
-      });
+      setState(() => _genderController.text = selected);
     }
   }
 
-  //Blood group select method
+  // Blood group select
   Future<void> pickBloodGroup() async {
     String? selected = await showModalBottomSheet<String>(
       context: context,
+      isScrollControlled: true,
       builder: (context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: Text("A+"),
-              onTap: () => Navigator.pop(context, "A+"),
-            ),
-            ListTile(
-              title: Text("A-"),
-              onTap: () => Navigator.pop(context, "A-"),
-            ),
-            ListTile(
-              title: Text("B+"),
-              onTap: () => Navigator.pop(context, "B+"),
-            ),
-            ListTile(
-              title: Text("B-"),
-              onTap: () => Navigator.pop(context, "B-"),
-            ),
-            ListTile(
-              title: Text("O+"),
-              onTap: () => Navigator.pop(context, "O+"),
-            ),
-            ListTile(
-              title: Text("O-"),
-              onTap: () => Navigator.pop(context, "O-"),
-            ),
-            ListTile(
-              title: Text("AB+"),
-              onTap: () => Navigator.pop(context, "AB+"),
-            ),
-            ListTile(
-              title: Text("AB-"),
-              onTap: () => Navigator.pop(context, "AB-"),
-            ),
-          ],
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text("A+"),
+                onTap: () => Navigator.pop(context, "A+"),
+              ),
+              ListTile(
+                title: const Text("A-"),
+                onTap: () => Navigator.pop(context, "A-"),
+              ),
+              ListTile(
+                title: const Text("B+"),
+                onTap: () => Navigator.pop(context, "B+"),
+              ),
+              ListTile(
+                title: const Text("B-"),
+                onTap: () => Navigator.pop(context, "B-"),
+              ),
+              ListTile(
+                title: const Text("O+"),
+                onTap: () => Navigator.pop(context, "O+"),
+              ),
+              ListTile(
+                title: const Text("O-"),
+                onTap: () => Navigator.pop(context, "O-"),
+              ),
+              ListTile(
+                title: const Text("AB+"),
+                onTap: () => Navigator.pop(context, "AB+"),
+              ),
+              ListTile(
+                title: const Text("AB-"),
+                onTap: () => Navigator.pop(context, "AB-"),
+              ),
+            ],
+          ),
         );
       },
     );
 
     if (selected != null) {
-      setState(() {
-        _bloodController.text = selected;
-      });
+      setState(() => _bloodController.text = selected);
     }
+  }
+
+  // Reusable text field
+  Widget _buildField(
+    TextEditingController ctrl,
+    String label,
+    String hint,
+    double pagePad, {
+    bool readOnly = false,
+    VoidCallback? onTap,
+    IconData? suffixIcon,
+    TextInputType? keyboard,
+    bool obscure = false,
+  }) {
+    return TextField(
+      controller: ctrl,
+      readOnly: readOnly,
+      onTap: onTap,
+      keyboardType: keyboard,
+      obscureText: obscure,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Color.fromARGB(255, 78, 91, 106)),
+        hintText: hint,
+        hintStyle: const TextStyle(color: Color.fromARGB(255, 182, 179, 179)),
+        suffixIcon: suffixIcon != null ? Icon(suffixIcon) : null,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(
+            color: Color.fromARGB(255, 182, 179, 179),
+            width: 0.9,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(
+            color: Color.fromARGB(255, 78, 91, 106),
+            width: 1.5,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final height = MediaQuery.sizeOf(context).height;
     final width = MediaQuery.sizeOf(context).width;
-
     final double pagePad = width * 0.04;
-    final double titleSize = width * 0.09;
     final double sectionSize = width * 0.055;
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        scrolledUnderElevation: 0,
-        title: Row(
-          children: [
-            SizedBox(width: pagePad),
-            Image.asset(
-              'assets/logo.jpeg',
-              width: width * 0.08,
-              height: width * 0.08,
-            ),
-            SizedBox(width: pagePad * 0.6),
-            Text(
-              "LUSSC",
-              style: TextStyle(
-                color: Color.fromARGB(255, 78, 91, 106),
-                fontSize: sectionSize,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
       body: Stack(
         children: [
           Positioned.fill(
             child: Image.asset("assets/backg.png", fit: BoxFit.cover),
           ),
-          Positioned(
-            top: pagePad,
-            left: pagePad * 1.5,
-            right: pagePad * 1.5,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Join the LUSSC Family!",
-                  style: TextStyle(
-                    fontSize: titleSize,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 78, 91, 106),
-                  ),
-                ),
-                SizedBox(height: pagePad * 0.6),
-
-                Text(
-                  "Fill out the form below to become a member of the Leading Umiversity Social Service Club and make a positive impact.",
-                  textAlign: TextAlign.start,
-                  style: TextStyle(
-                    fontSize: sectionSize * 0.75,
-                    color: Color.fromARGB(255, 78, 91, 106),
-                  ),
-                ),
-              ],
-            ),
+          Positioned.fill(
+            child: Container(color: Colors.white.withOpacity(0.35)),
           ),
-          Center(
-            child: Container(
-              margin: EdgeInsets.fromLTRB(
-                pagePad * 1.8,
-                height * 0.15,
-                pagePad * 1.8,
-                pagePad * 2,
-              ),
-              padding: EdgeInsets.all(pagePad),
-              decoration: BoxDecoration(
-                color: Colors.white.withAlpha(220),
-                borderRadius: BorderRadius.circular(15),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withAlpha(50),
-                    blurRadius: 15,
-                    offset: Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: Stack(
-                children: [
-                  Center(
-                    child: Opacity(
-                      opacity: 0.08,
-                      child: Image.asset(
-                        "assets/logo.jpeg",
-                        width: width * 0.85,
-                      ),
+          SafeArea(
+            child: Column(
+              children: [
+                // HEADER — same style as login page
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.92),
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.arrow_back_ios_new),
+                        ),
+                        Image.asset(
+                          'assets/logo.jpeg',
+                          height: 34,
+                          width: 34,
+                          fit: BoxFit.contain,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          "LUSSC",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Membership Registration Form",
-                        style: TextStyle(
-                          fontSize: sectionSize,
-                          fontWeight: FontWeight.bold,
-                          color: Color.fromARGB(255, 72, 131, 198),
-                        ),
-                      ),
-                      SizedBox(height: pagePad * 0.4),
+                ),
 
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            Text(
-                              "Step 1: Fill the form",
-                              style: TextStyle(
-                                fontSize: sectionSize * 0.65,
-                                color: Color.fromARGB(255, 72, 131, 198),
-                              ),
-                            ),
-                            SizedBox(width: pagePad * 0.4),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              size: sectionSize * 0.7,
-                              color: const Color.fromARGB(255, 182, 179, 179),
-                            ),
-                            SizedBox(width: pagePad * 0.4),
-                            Text(
-                              "Step 2: Pay fee",
-                              style: TextStyle(
-                                fontSize: sectionSize * 0.65,
-                                color: const Color.fromARGB(255, 182, 179, 179),
-                              ),
-                            ),
-                            SizedBox(width: pagePad * 0.4),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              size: sectionSize * 0.7,
-                              color: const Color.fromARGB(255, 182, 179, 179),
-                            ),
-                            SizedBox(width: pagePad * 0.4),
-                            Text(
-                              "Step 3: Wait for admin verify",
-                              style: TextStyle(
-                                fontSize: sectionSize * 0.65,
-                                color: const Color.fromARGB(255, 182, 179, 179),
-                              ),
-                            ),
-                          ],
+                // BODY
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(horizontal: pagePad),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: pagePad),
+
+                        // Title — same font as login page
+                        const Text(
+                          "Join the LUSSC\nFamily!",
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.w800,
+                            height: 1.1,
+                            color: Color(0xFF184B6A),
+                          ),
                         ),
-                      ),
-                      SizedBox(height: pagePad),
-                      Expanded(
-                        child: SingleChildScrollView(
-                          child: Column(
+                        SizedBox(height: pagePad * 0.6),
+
+                        Text(
+                          "Fill out the form below to become a member of the Leading University Social Service Club and make a positive impact.",
+                          style: TextStyle(
+                            fontSize: sectionSize * 0.75,
+                            color: const Color.fromARGB(255, 78, 91, 106),
+                          ),
+                        ),
+                        SizedBox(height: pagePad),
+
+                        // Registration form card
+                        Container(
+                          padding: EdgeInsets.all(pagePad),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withAlpha(220),
+                            borderRadius: BorderRadius.circular(15),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withAlpha(50),
+                                blurRadius: 15,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: Stack(
                             children: [
-                              SizedBox(height: pagePad * 0.7),
-                              TextField(
-                                controller: _nameController,
-                                decoration: InputDecoration(
-                                  labelText: "Full Name",
-                                  labelStyle: TextStyle(
-                                    color: Color.fromARGB(255, 78, 91, 106),
-                                  ),
-                                  hintText: "Enter your full name",
-                                  hintStyle: TextStyle(
-                                    color: const Color.fromARGB(
-                                      255,
-                                      182,
-                                      179,
-                                      179,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: const Color.fromARGB(
-                                        255,
-                                        182,
-                                        179,
-                                        179,
-                                      ),
-                                      width: 0.9,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: Color.fromARGB(255, 78, 91, 106),
-                                      width: 1.5,
-                                    ),
+                              Center(
+                                child: Opacity(
+                                  opacity: 0.08,
+                                  child: Image.asset(
+                                    "assets/logo.jpeg",
+                                    width: width * 0.85,
                                   ),
                                 ),
                               ),
-                              SizedBox(height: pagePad * 1.4),
-                              TextField(
-                                controller: _studentIdController,
-                                decoration: InputDecoration(
-                                  labelText: "Student ID",
-                                  labelStyle: TextStyle(
-                                    color: Color.fromARGB(255, 78, 91, 106),
-                                  ),
-                                  hintText: "Enter your student ID",
-                                  hintStyle: TextStyle(
-                                    color: const Color.fromARGB(
-                                      255,
-                                      182,
-                                      179,
-                                      179,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Membership Registration Form",
+                                    style: TextStyle(
+                                      fontSize: sectionSize,
+                                      fontWeight: FontWeight.bold,
                                       color: const Color.fromARGB(
                                         255,
-                                        182,
-                                        179,
-                                        179,
+                                        72,
+                                        131,
+                                        198,
                                       ),
-                                      width: 0.9,
                                     ),
                                   ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: Color.fromARGB(255, 78, 91, 106),
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(height: pagePad * 1.4),
-                              TextField(
-                                controller: _deptController,
-                                decoration: InputDecoration(
-                                  labelText: "Department",
-                                  labelStyle: TextStyle(
-                                    color: Color.fromARGB(255, 78, 91, 106),
-                                  ),
-                                  hintText: "e.g., CSE",
-                                  hintStyle: TextStyle(
-                                    color: const Color.fromARGB(
-                                      255,
-                                      182,
-                                      179,
-                                      179,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: const Color.fromARGB(
-                                        255,
-                                        182,
-                                        179,
-                                        179,
-                                      ),
-                                      width: 0.9,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: Color.fromARGB(255, 78, 91, 106),
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(height: pagePad * 1.4),
-                              TextField(
-                                controller: _batchController,
-                                keyboardType: TextInputType.number,
-                                decoration: InputDecoration(
-                                  labelText: "Batch",
-                                  labelStyle: TextStyle(
-                                    color: Color.fromARGB(255, 78, 91, 106),
-                                  ),
-                                  hintText: "e.g., 56",
-                                  hintStyle: TextStyle(
-                                    color: const Color.fromARGB(
-                                      255,
-                                      182,
-                                      179,
-                                      179,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: const Color.fromARGB(
-                                        255,
-                                        182,
-                                        179,
-                                        179,
-                                      ),
-                                      width: 0.9,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: Color.fromARGB(255, 78, 91, 106),
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(height: pagePad * 1.4),
-                              TextField(
-                                controller: _emailController,
-                                decoration: InputDecoration(
-                                  labelText: "Email",
-                                  labelStyle: TextStyle(
-                                    color: Color.fromARGB(255, 78, 91, 106),
-                                  ),
-                                  hintText: "Enter your email address",
-                                  hintStyle: TextStyle(
-                                    color: const Color.fromARGB(
-                                      255,
-                                      182,
-                                      179,
-                                      179,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: const Color.fromARGB(
-                                        255,
-                                        182,
-                                        179,
-                                        179,
-                                      ),
-                                      width: 0.9,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: Color.fromARGB(255, 78, 91, 106),
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(height: pagePad * 1.4),
-                              TextField(
-                                controller: _phoneController,
-                                keyboardType: TextInputType.phone,
-                                decoration: InputDecoration(
-                                  labelText: "Phone Number",
-                                  labelStyle: TextStyle(
-                                    color: Color.fromARGB(255, 78, 91, 106),
-                                  ),
-                                  hintText: "e.g., 01XXXXXXXXX",
-                                  hintStyle: TextStyle(
-                                    color: const Color.fromARGB(
-                                      255,
-                                      182,
-                                      179,
-                                      179,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: const Color.fromARGB(
-                                        255,
-                                        182,
-                                        179,
-                                        179,
-                                      ),
-                                      width: 0.9,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: Color.fromARGB(255, 78, 91, 106),
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(height: pagePad * 1.4),
+                                  SizedBox(height: pagePad * 0.4),
 
-                              TextField(
-                                controller: _genderController,
-                                readOnly: true,
-                                decoration: InputDecoration(
-                                  labelText: "Gender",
-                                  hintText: "Select Gender",
-                                  suffixIcon: Icon(Icons.arrow_drop_down),
-
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: Color.fromARGB(255, 182, 179, 179),
-                                      width: 0.9,
+                                  // Steps
+                                  SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          "Step 1: Fill the form",
+                                          style: TextStyle(
+                                            fontSize: sectionSize * 0.65,
+                                            color: const Color.fromARGB(
+                                              255,
+                                              72,
+                                              131,
+                                              198,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: pagePad * 0.4),
+                                        Icon(
+                                          Icons.arrow_forward_ios,
+                                          size: sectionSize * 0.7,
+                                          color: const Color.fromARGB(
+                                            255,
+                                            182,
+                                            179,
+                                            179,
+                                          ),
+                                        ),
+                                        SizedBox(width: pagePad * 0.4),
+                                        Text(
+                                          "Step 2: Pay fee",
+                                          style: TextStyle(
+                                            fontSize: sectionSize * 0.65,
+                                            color: const Color.fromARGB(
+                                              255,
+                                              182,
+                                              179,
+                                              179,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: pagePad * 0.4),
+                                        Icon(
+                                          Icons.arrow_forward_ios,
+                                          size: sectionSize * 0.7,
+                                          color: const Color.fromARGB(
+                                            255,
+                                            182,
+                                            179,
+                                            179,
+                                          ),
+                                        ),
+                                        SizedBox(width: pagePad * 0.4),
+                                        Text(
+                                          "Step 3: Wait for admin verify",
+                                          style: TextStyle(
+                                            fontSize: sectionSize * 0.65,
+                                            color: const Color.fromARGB(
+                                              255,
+                                              182,
+                                              179,
+                                              179,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
+                                  SizedBox(height: pagePad),
 
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: Color.fromARGB(255, 78, 91, 106),
-                                      width: 1.5,
-                                    ),
+                                  // Form fields
+                                  _buildField(
+                                    _nameController,
+                                    "Full Name",
+                                    "Enter your full name",
+                                    pagePad,
                                   ),
-                                ),
-                                onTap: pickGender,
-                              ),
-                              SizedBox(height: pagePad * 1.4),
+                                  SizedBox(height: pagePad * 1.4),
+                                  _buildField(
+                                    _studentIdController,
+                                    "Student ID",
+                                    "Enter your student ID",
+                                    pagePad,
+                                  ),
+                                  SizedBox(height: pagePad * 1.4),
+                                  _buildField(
+                                    _deptController,
+                                    "Department",
+                                    "e.g., CSE",
+                                    pagePad,
+                                  ),
+                                  SizedBox(height: pagePad * 1.4),
+                                  _buildField(
+                                    _batchController,
+                                    "Batch",
+                                    "e.g., 56",
+                                    pagePad,
+                                    keyboard: TextInputType.number,
+                                  ),
+                                  SizedBox(height: pagePad * 1.4),
+                                  _buildField(
+                                    _emailController,
+                                    "Email",
+                                    "Enter your email address",
+                                    pagePad,
+                                  ),
+                                  SizedBox(height: pagePad * 1.4),
+                                  _buildField(
+                                    _phoneController,
+                                    "Phone Number",
+                                    "e.g., 01XXXXXXXXX",
+                                    pagePad,
+                                    keyboard: TextInputType.phone,
+                                  ),
+                                  SizedBox(height: pagePad * 1.4),
+                                  _buildField(
+                                    _genderController,
+                                    "Gender",
+                                    "Select Gender",
+                                    pagePad,
+                                    readOnly: true,
+                                    onTap: pickGender,
+                                    suffixIcon: Icons.arrow_drop_down,
+                                  ),
+                                  SizedBox(height: pagePad * 1.4),
+                                  _buildField(
+                                    _bloodController,
+                                    "Blood Group (Optional)",
+                                    "Select Blood Group",
+                                    pagePad,
+                                    readOnly: true,
+                                    onTap: pickBloodGroup,
+                                    suffixIcon: Icons.arrow_drop_down,
+                                  ),
+                                  SizedBox(height: pagePad * 1.4),
+                                  _buildField(
+                                    _addressController,
+                                    "Address",
+                                    "Enter your present address",
+                                    pagePad,
+                                  ),
+                                  SizedBox(height: pagePad * 1.4),
+                                  _buildField(
+                                    _passwordController,
+                                    "Password",
+                                    "Enter password",
+                                    pagePad,
+                                    obscure: true,
+                                  ),
+                                  SizedBox(height: pagePad * 1.4),
+                                  _buildField(
+                                    _confirmPassController,
+                                    "Confirm Password",
+                                    "Re-enter password",
+                                    pagePad,
+                                    obscure: true,
+                                  ),
+                                  SizedBox(height: pagePad * 2.4),
 
-                              TextField(
-                                controller: _bloodController,
-                                readOnly: true,
-                                decoration: InputDecoration(
-                                  labelText: "Blood Group (Optional)",
-                                  hintText: "Select Blood Group",
-                                  suffixIcon: const Icon(Icons.arrow_drop_down),
-
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: const BorderSide(
-                                      color: Color.fromARGB(255, 182, 179, 179),
-                                      width: 0.9,
-                                    ),
-                                  ),
-
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: const BorderSide(
-                                      color: Color.fromARGB(255, 78, 91, 106),
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                ),
-
-                                onTap: pickBloodGroup,
-                              ),
-                              SizedBox(height: pagePad * 1.4),
-                              TextField(
-                                controller: _addressController,
-                                decoration: InputDecoration(
-                                  labelText: "Address",
-                                  labelStyle: TextStyle(
-                                    color: Color.fromARGB(255, 78, 91, 106),
-                                  ),
-                                  hintText: "Enter your present address",
-                                  hintStyle: TextStyle(
-                                    color: const Color.fromARGB(
-                                      255,
-                                      182,
-                                      179,
-                                      179,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: const Color.fromARGB(
+                                  // Submit button
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color.fromARGB(
                                         255,
-                                        182,
-                                        179,
-                                        179,
+                                        72,
+                                        131,
+                                        198,
                                       ),
-                                      width: 0.9,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: Color.fromARGB(255, 78, 91, 106),
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(height: pagePad * 1.4),
-                              TextField(
-                                controller: _passwordController,
-                                obscureText: true,
-                                decoration: InputDecoration(
-                                  labelText: "Password",
-                                  labelStyle: TextStyle(
-                                    color: Color.fromARGB(255, 78, 91, 106),
-                                  ),
-                                  hintText: "Enter password",
-                                  hintStyle: TextStyle(
-                                    color: const Color.fromARGB(
-                                      255,
-                                      182,
-                                      179,
-                                      179,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: const Color.fromARGB(
-                                        255,
-                                        182,
-                                        179,
-                                        179,
+                                      foregroundColor: Colors.white,
+                                      minimumSize: Size(
+                                        double.infinity,
+                                        (width * 0.13).clamp(46.0, 56.0),
                                       ),
-                                      width: 0.9,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: Color.fromARGB(255, 78, 91, 106),
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(height: pagePad * 1.4),
-                              TextField(
-                                controller: _confirmPassController,
-                                obscureText: true,
-                                decoration: InputDecoration(
-                                  labelText: "Confirm Password",
-                                  labelStyle: TextStyle(
-                                    color: Color.fromARGB(255, 78, 91, 106),
-                                  ),
-                                  hintText: "Re-enter password",
-                                  hintStyle: TextStyle(
-                                    color: const Color.fromARGB(
-                                      255,
-                                      182,
-                                      179,
-                                      179,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: const Color.fromARGB(
-                                        255,
-                                        182,
-                                        179,
-                                        179,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
                                       ),
-                                      width: 0.9,
+                                    ),
+                                    onPressed: submitForm,
+                                    child: Text(
+                                      "Continue to Payment →",
+                                      style: TextStyle(fontSize: sectionSize),
                                     ),
                                   ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: Color.fromARGB(255, 78, 91, 106),
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(height: pagePad * 2.4),
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Color.fromARGB(
-                                    255,
-                                    72,
-                                    131,
-                                    198,
-                                  ),
-                                  foregroundColor: Colors.white,
-                                  minimumSize: Size(
-                                    double.infinity,
-                                    (width * 0.13).clamp(46.0, 56.0),
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                                onPressed: submitForm,
-                                child: Text(
-                                  "Continue to Payment →",
-                                  style: TextStyle(fontSize: sectionSize),
-                                ),
+                                ],
                               ),
                             ],
                           ),
                         ),
-                      ),
-                    ],
+
+                        SizedBox(height: pagePad * 2),
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],

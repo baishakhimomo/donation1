@@ -105,15 +105,20 @@ class _BloodPageState extends State<BloodPage> {
   Future<void> _pickBloodGroup() async {
     final selected = await showModalBottomSheet<String>(
       context: context,
+      isScrollControlled: true,
       builder: (context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'].map((g) {
-            return ListTile(
-              title: Text(g),
-              onTap: () => Navigator.pop(context, g),
-            );
-          }).toList(),
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'].map((
+              g,
+            ) {
+              return ListTile(
+                title: Text(g),
+                onTap: () => Navigator.pop(context, g),
+              );
+            }).toList(),
+          ),
         );
       },
     );
@@ -129,12 +134,22 @@ class _BloodPageState extends State<BloodPage> {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
           title: const Text('Login Required'),
           content: const Text(
             'Please log in as a donor or member to register.',
           ),
           actions: [
-            TextButton(
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1E6FA8),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
               onPressed: () => Navigator.pop(ctx),
               child: const Text('OK'),
             ),
@@ -283,16 +298,29 @@ class _BloodPageState extends State<BloodPage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         title: const Text('Delete Entry?'),
         content: Text('Remove ${donor['name']}?'),
         actions: [
-          TextButton(
+          OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
             onPressed: () => Navigator.pop(ctx, false),
             child: const Text('Cancel'),
           ),
-          TextButton(
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Delete'),
           ),
         ],
       ),
@@ -328,7 +356,6 @@ class _BloodPageState extends State<BloodPage> {
     final double titleSize = width * 0.055;
     final double bodySize = width * 0.037;
     final double smallSize = width * 0.032;
-    final double headerHeight = width * 0.15;
 
     // Filter donors for display
     final filtered = _donors.where((d) {
@@ -351,48 +378,47 @@ class _BloodPageState extends State<BloodPage> {
           SafeArea(
             child: Column(
               children: [
-                // ===== HEADER =====
-                Container(
-                  height: headerHeight,
-                  margin: EdgeInsets.only(
-                    top: pagePad,
-                    left: pagePad,
-                    right: pagePad,
-                  ),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: pagePad * 0.6,
-                    vertical: pagePad * 0.5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(18),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withAlpha(30),
-                        blurRadius: 12,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.arrow_back),
-                      ),
-                      Image.asset('assets/logo.jpeg', width: width * 0.08),
-                      SizedBox(width: pagePad * 0.4),
-                      Expanded(
-                        child: Text(
-                          'DONATE BLOOD',
+                // ===== HEADER — same as login page =====
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.92),
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.arrow_back_ios_new),
+                        ),
+                        Image.asset(
+                          'assets/logo.jpeg',
+                          height: 34,
+                          width: 34,
+                          fit: BoxFit.contain,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          "Donate Blood",
                           style: TextStyle(
-                            fontSize: titleSize,
-                            fontWeight: FontWeight.bold,
-                            color: const Color.fromARGB(255, 78, 91, 106),
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
 
@@ -666,6 +692,7 @@ class _BloodPageState extends State<BloodPage> {
       onTap: onTap,
       keyboardType: keyboard,
       style: TextStyle(fontSize: fontSize),
+      textAlign: TextAlign.center,
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,

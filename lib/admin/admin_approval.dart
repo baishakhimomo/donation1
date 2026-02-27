@@ -290,16 +290,20 @@ class _AdminApprovalPageState extends State<AdminApprovalPage> {
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color.fromARGB(255, 30, 111, 168),
-
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new),
+          onPressed: () => Navigator.pop(context),
+        ),
         actions: [
           Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  onPressed: () => Navigator.push(
+                  onPressed: () => Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(builder: (context) => const HomePage()),
+                    (_) => false,
                   ),
                   icon: const Icon(Icons.home),
                   color: Colors.white,

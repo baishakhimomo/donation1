@@ -86,45 +86,62 @@ class _MyProfileState extends State<MyProfile> {
           Positioned.fill(
             child: Image.asset('assets/backg.png', fit: BoxFit.cover),
           ),
-          Positioned.fill(child: Container(color: Colors.black.withAlpha(60))),
+
+          // Watermark logo in center
+          Positioned.fill(
+            child: Align(
+              alignment: Alignment.center,
+              child: Opacity(
+                opacity: 0.08,
+                child: Image.asset('assets/logo.jpeg', width: width * 0.6),
+              ),
+            ),
+          ),
 
           SafeArea(
             child: Column(
               children: [
-                // ── Top bar ──
-                Container(
-                  margin: EdgeInsets.all(pagePad),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: const [
-                      BoxShadow(
-                        blurRadius: 15,
-                        color: Colors.black26,
-                        offset: Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      Image.asset('assets/logo.jpeg', width: 34),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'My Profile',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                // ── Top bar — same as login page ──
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.92),
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back_ios_new),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        Image.asset(
+                          'assets/logo.jpeg',
+                          height: 34,
+                          width: 34,
+                          fit: BoxFit.contain,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'My Profile',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 

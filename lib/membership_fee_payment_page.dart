@@ -82,19 +82,22 @@ class _MembershipFeePaymentPageState extends State<MembershipFeePaymentPage> {
   Future<void> pickPaymentMethod() async {
     String? selected = await showModalBottomSheet<String>(
       context: context,
+      isScrollControlled: true,
       builder: (context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: Text("bKash"),
-              onTap: () => Navigator.pop(context, "bKash"),
-            ),
-            ListTile(
-              title: Text("Nagad"),
-              onTap: () => Navigator.pop(context, "Nagad"),
-            ),
-          ],
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text("bKash"),
+                onTap: () => Navigator.pop(context, "bKash"),
+              ),
+              ListTile(
+                title: const Text("Nagad"),
+                onTap: () => Navigator.pop(context, "Nagad"),
+              ),
+            ],
+          ),
         );
       },
     );

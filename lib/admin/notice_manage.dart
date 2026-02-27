@@ -55,23 +55,24 @@ class _NoticeManagePageState extends State<NoticeManagePage> {
 
   // Load all notices from Supabase (newest first)
   Future<void> _loadNotices() async {
+    if (!mounted) return;
     setState(() => _loading = true);
     try {
       final rows = await Supabase.instance.client
           .from('notices')
           .select()
           .order('created_at', ascending: false);
+      if (!mounted) return;
       setState(() {
         _notices = List<Map<String, dynamic>>.from(rows as List);
         _loading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() => _loading = false);
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
-      }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
@@ -103,9 +104,9 @@ class _NoticeManagePageState extends State<NoticeManagePage> {
 
     final saved = await showDialog<bool>(
       context: context,
-      builder: (context) {
+      builder: (dialogCtx) {
         return StatefulBuilder(
-          builder: (context, setDialogState) {
+          builder: (stfCtx, setDialogState) {
             return AlertDialog(
               title: Text(existing == null ? 'New Notice' : 'Edit Notice'),
               content: SingleChildScrollView(
@@ -213,7 +214,7 @@ class _NoticeManagePageState extends State<NoticeManagePage> {
                       ),
                       onTap: () async {
                         final picked = await showDatePicker(
-                          context: context,
+                          context: dialogCtx,
                           initialDate: DateTime.now(),
                           firstDate: DateTime(2020),
                           lastDate: DateTime(2030),
@@ -247,7 +248,7 @@ class _NoticeManagePageState extends State<NoticeManagePage> {
                       ),
                       onTap: () async {
                         final picked = await showTimePicker(
-                          context: context,
+                          context: dialogCtx,
                           initialTime: TimeOfDay.now(),
                         );
                         if (picked != null) {
@@ -291,11 +292,11 @@ class _NoticeManagePageState extends State<NoticeManagePage> {
               ),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pop(context, false),
+                  onPressed: () => Navigator.pop(dialogCtx, false),
                   child: const Text('Cancel'),
                 ),
                 ElevatedButton(
-                  onPressed: () => Navigator.pop(context, true),
+                  onPressed: () => Navigator.pop(dialogCtx, true),
                   child: const Text('Save'),
                 ),
               ],
@@ -545,7 +546,10 @@ class _NoticeManagePageState extends State<NoticeManagePage> {
             const SizedBox(height: 4),
 
             // Body
-            Text(body, style: const TextStyle(color: Colors.black54)),
+            Text(
+              body,
+              style: const TextStyle(color: Color.fromARGB(137, 0, 0, 0)),
+            ),
 
             // Location
             if (location.isNotEmpty) ...[

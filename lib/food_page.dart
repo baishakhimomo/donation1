@@ -132,7 +132,6 @@ class _FoodPageState extends State<FoodPage> {
     final width = MediaQuery.sizeOf(context).width;
 
     final double pagePad = width * 0.04;
-    final double titleSize = width * 0.09;
     final double sectionSize = width * 0.055;
 
     return Scaffold(
@@ -153,45 +152,47 @@ class _FoodPageState extends State<FoodPage> {
                   constraints: const BoxConstraints(maxWidth: 700),
                   child: Column(
                     children: [
-                      //  TOP BAR
+                      // ================= HEADER — same as login page =================
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
+                          horizontal: 12,
                           vertical: 10,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withAlpha(217), // 85% opacity
-                          borderRadius: BorderRadius.circular(18),
+                          color: Colors.white.withOpacity(0.92),
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 12,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
                         ),
                         child: Row(
                           children: [
                             IconButton(
-                              icon: const Icon(
-                                Icons.arrow_back_ios_new_rounded,
-                              ),
+                              icon: const Icon(Icons.arrow_back_ios_new),
                               onPressed: () => Navigator.pop(context),
+                              padding: EdgeInsets.zero,
                             ),
-                            const SizedBox(width: 4),
-                            Image.asset('assets/logoremove.jpeg', height: 28),
-                            const SizedBox(width: 10),
+                            Image.asset(
+                              'assets/logo.jpeg',
+                              height: 34,
+                              width: 34,
+                              fit: BoxFit.contain,
+                            ),
+                            const SizedBox(width: 8),
                             const Text(
-                              "LUSSC",
-                              style: TextStyle(fontWeight: FontWeight.w900),
+                              'Donate Food',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
                             const Spacer(),
                             buildMenu(context),
                           ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      Text(
-                        "Food Donation",
-                        style: TextStyle(
-                          fontSize: titleSize,
-                          fontWeight: FontWeight.w900,
-                          color: const Color.fromRGBO(14, 63, 122, 1),
                         ),
                       ),
 

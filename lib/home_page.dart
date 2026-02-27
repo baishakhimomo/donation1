@@ -8,7 +8,6 @@ import 'package:donation_app/cloth_page.dart';
 import 'package:donation_app/food_page.dart';
 import 'package:donation_app/logOut.dart';
 import 'package:donation_app/mem_login.dart';
-import 'package:donation_app/member_form.dart';
 import 'package:donation_app/money_don.dart';
 import 'package:donation_app/notice.dart';
 import 'package:donation_app/notification_page.dart';
@@ -100,12 +99,22 @@ class _HomePageState extends State<HomePage> {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
           title: const Text('Login Required'),
           content: const Text(
             'Please log in as a donor or member to access this section.',
           ),
           actions: [
-            TextButton(
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1E6FA8),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
               onPressed: () => Navigator.pop(ctx),
               child: const Text('OK'),
             ),
@@ -146,15 +155,10 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
-    final topInset = MediaQuery.of(context).padding.top;
 
     final double pagePad = width * 0.04;
     final double titleSize = width * 0.09;
     final double sectionSize = width * 0.055;
-
-    final double headerHeight = width * 0.15;
-    final double headerTop = topInset + pagePad;
-    final double contentTop = headerTop + headerHeight + pagePad;
 
     return Scaffold(
       body: Stack(
@@ -165,355 +169,394 @@ class _HomePageState extends State<HomePage> {
 
           // ================= HEADER =================
           SafeArea(
-            child: Container(
-              height: headerHeight,
-              margin: EdgeInsets.only(
-                top: pagePad,
-                left: pagePad,
-                right: pagePad,
-              ),
-              padding: EdgeInsets.symmetric(
-                horizontal: pagePad * 0.6,
-                vertical: pagePad * 0.5,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withAlpha(30),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Image.asset('assets/logo.jpeg', width: width * 0.09),
-                  SizedBox(width: pagePad * 0.6),
-                  Text(
-                    'HOME',
-                    style: TextStyle(
-                      fontSize: titleSize * 0.68,
-                      fontWeight: FontWeight.bold,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
                     ),
-                  ),
-                  const Spacer(),
-
-                  // Bell icon for notices
-                  _buildBellIcon(context),
-                  const SizedBox(width: 4),
-
-                  //Menu Bar
-                  buildMenu(context),
-                ],
-              ),
-            ),
-          ),
-
-          Padding(
-            padding: EdgeInsets.only(
-              top: contentTop,
-              left: pagePad,
-              right: pagePad,
-              bottom: pagePad,
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ================= SLIDER =================
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(22),
-                    child: SizedBox(
-                      height: width * 0.58,
-                      child: PageView(
-                        controller: _pageController,
-                        children: slides.map((img) {
-                          return Image.asset(img, fit: BoxFit.cover);
-                        }).toList(),
-                        onPageChanged: (i) {
-                          _pageIndex = i;
-                          setState(() {});
-                        },
-                      ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.92),
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
                     ),
-                  ),
-
-                  SizedBox(height: pagePad * 0.6),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      for (int i = 0; i < slides.length; i++)
-                        Container(
-                          margin: EdgeInsets.symmetric(
-                            horizontal: pagePad * 0.25,
-                          ),
-                          height: width * 0.02,
-                          width: _pageIndex == i ? width * 0.045 : width * 0.02,
-                          decoration: BoxDecoration(
-                            color: _pageIndex == i
-                                ? Colors.blue
-                                : const Color.fromARGB(255, 151, 144, 144),
-                            borderRadius: BorderRadius.circular(10),
+                    child: Row(
+                      children: [
+                        Image.asset(
+                          'assets/logo.jpeg',
+                          height: 34,
+                          width: 34,
+                          fit: BoxFit.contain,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'HOME',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
-                    ],
-                  ),
+                        const Spacer(),
 
-                  SizedBox(height: pagePad * 1.2),
+                        // Bell icon for notices
+                        _buildBellIcon(context),
+                        const SizedBox(width: 4),
 
-                  // ================= MAIN WORK =================
-                  Text(
-                    'Our Main Work',
-                    style: TextStyle(
-                      fontSize: titleSize * 0.62,
-                      fontWeight: FontWeight.bold,
+                        //Menu Bar
+                        buildMenu(context),
+                      ],
                     ),
                   ),
+                ),
 
-                  SizedBox(height: pagePad * 0.8),
-
-                  Row(
-                    children: [
-                      mainWorkCard(
-                        'Clothes',
-                        Icons.checkroom,
-                        const Color.fromARGB(255, 144, 202, 249),
-                      ),
-                      SizedBox(width: pagePad * 0.8),
-                      mainWorkCard(
-                        'Food',
-                        Icons.restaurant,
-                        const Color.fromARGB(255, 129, 199, 132),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: pagePad * 0.8),
-
-                  Row(
-                    children: [
-                      mainWorkCard(
-                        'Blood',
-                        Icons.bloodtype,
-                        const Color.fromARGB(255, 239, 154, 154),
-                      ),
-                      SizedBox(width: pagePad * 0.8),
-                      mainWorkCard(
-                        'Money',
-                        Icons.monetization_on,
-                        const Color.fromARGB(255, 250, 236, 112),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: pagePad * 1.6),
-
-                  // ================= ACTIVE EVENTS =================
-                  Text(
-                    'Active Events',
-                    style: TextStyle(
-                      fontSize: titleSize * 0.62,
-                      fontWeight: FontWeight.bold,
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: pagePad,
+                      vertical: pagePad * 0.5,
                     ),
-                  ),
-
-                  SizedBox(height: pagePad * 0.8),
-
-                  _activeEvents.isEmpty
-                      ? Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.all(pagePad * 2),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withAlpha(180),
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          child: Text(
-                            'No active events right now.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.black54,
-                              fontSize: sectionSize * 0.8,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // ================= SLIDER =================
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(22),
+                          child: SizedBox(
+                            height: width * 0.58,
+                            child: PageView(
+                              controller: _pageController,
+                              children: slides.map((img) {
+                                return Image.asset(img, fit: BoxFit.cover);
+                              }).toList(),
+                              onPageChanged: (i) {
+                                _pageIndex = i;
+                                setState(() {});
+                              },
                             ),
                           ),
-                        )
-                      : SizedBox(
-                          height: width * 0.45,
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            children: _activeEvents.map((event) {
-                              final Color baseColor =
-                                  event['cardColor'] as Color;
-                              final IconData iconData =
-                                  event['icon'] as IconData;
+                        ),
 
-                              return Container(
-                                width: width * 0.56,
-                                margin: EdgeInsets.only(right: pagePad * 0.8),
-                                padding: EdgeInsets.all(pagePad * 0.9),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.bottomLeft,
-                                    end: Alignment.topRight,
-                                    colors: [
-                                      baseColor.withAlpha(80),
-                                      baseColor,
-                                    ],
-                                  ),
-                                  borderRadius: BorderRadius.circular(18),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withAlpha(30),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 6),
-                                    ),
-                                  ],
+                        SizedBox(height: pagePad * 0.6),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            for (int i = 0; i < slides.length; i++)
+                              Container(
+                                margin: EdgeInsets.symmetric(
+                                  horizontal: pagePad * 0.25,
                                 ),
+                                height: width * 0.02,
+                                width: _pageIndex == i
+                                    ? width * 0.045
+                                    : width * 0.02,
+                                decoration: BoxDecoration(
+                                  color: _pageIndex == i
+                                      ? Colors.blue
+                                      : const Color.fromARGB(
+                                          255,
+                                          151,
+                                          144,
+                                          144,
+                                        ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                          ],
+                        ),
+
+                        SizedBox(height: pagePad * 1.2),
+
+                        // ================= MAIN WORK =================
+                        Text(
+                          'Our Main Work',
+                          style: TextStyle(
+                            fontSize: titleSize * 0.62,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        SizedBox(height: pagePad * 0.8),
+
+                        Row(
+                          children: [
+                            mainWorkCard(
+                              'Clothes',
+                              Icons.checkroom,
+                              const Color.fromARGB(255, 144, 202, 249),
+                            ),
+                            SizedBox(width: pagePad * 0.8),
+                            mainWorkCard(
+                              'Food',
+                              Icons.restaurant,
+                              const Color.fromARGB(255, 129, 199, 132),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: pagePad * 0.8),
+
+                        Row(
+                          children: [
+                            mainWorkCard(
+                              'Blood',
+                              Icons.bloodtype,
+                              const Color.fromARGB(255, 239, 154, 154),
+                            ),
+                            SizedBox(width: pagePad * 0.8),
+                            mainWorkCard(
+                              'Money',
+                              Icons.monetization_on,
+                              const Color.fromARGB(255, 250, 236, 112),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: pagePad * 1.6),
+
+                        // ================= ACTIVE EVENTS =================
+                        Text(
+                          'Active Events',
+                          style: TextStyle(
+                            fontSize: titleSize * 0.62,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        SizedBox(height: pagePad * 0.8),
+
+                        _activeEvents.isEmpty
+                            ? Container(
+                                width: double.infinity,
+                                padding: EdgeInsets.all(pagePad * 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withAlpha(180),
+                                  borderRadius: BorderRadius.circular(18),
+                                ),
+                                child: Text(
+                                  'No active events right now.',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.black54,
+                                    fontSize: sectionSize * 0.8,
+                                  ),
+                                ),
+                              )
+                            : SizedBox(
+                                height: width * 0.50,
+                                child: ListView(
+                                  scrollDirection: Axis.horizontal,
+                                  children: _activeEvents.map((event) {
+                                    final Color baseColor =
+                                        event['cardColor'] as Color;
+                                    final IconData iconData =
+                                        event['icon'] as IconData;
+
+                                    return Container(
+                                      width: width * 0.56,
+                                      margin: EdgeInsets.only(
+                                        right: pagePad * 0.8,
+                                      ),
+                                      padding: EdgeInsets.all(pagePad * 0.9),
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.bottomLeft,
+                                          end: Alignment.topRight,
+                                          colors: [
+                                            baseColor.withAlpha(80),
+                                            baseColor,
+                                          ],
+                                        ),
+                                        borderRadius: BorderRadius.circular(18),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withAlpha(30),
+                                            blurRadius: 10,
+                                            offset: const Offset(0, 6),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          CircleAvatar(
+                                            backgroundColor: baseColor,
+                                            child: Icon(
+                                              iconData,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          SizedBox(height: pagePad * 0.8),
+                                          Text(
+                                            event['title'] as String,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: sectionSize * 0.8,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          SizedBox(height: pagePad * 0.4),
+                                          Text(
+                                            event['date'] as String,
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: sectionSize * 0.7,
+                                            ),
+                                          ),
+                                          const Spacer(),
+                                          Align(
+                                            alignment: Alignment.bottomRight,
+                                            child: ElevatedButton(
+                                              onPressed: () {
+                                                // Check if user is logged in
+                                                final session = Supabase
+                                                    .instance
+                                                    .client
+                                                    .auth
+                                                    .currentSession;
+                                                if (session == null) {
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (ctx) => AlertDialog(
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              14,
+                                                            ),
+                                                      ),
+                                                      title: const Text(
+                                                        'Login Required',
+                                                      ),
+                                                      content: const Text(
+                                                        'Please login as a donor or member to join this event.',
+                                                      ),
+                                                      actions: [
+                                                        ElevatedButton(
+                                                          style: ElevatedButton.styleFrom(
+                                                            backgroundColor:
+                                                                const Color(
+                                                                  0xFF1E6FA8,
+                                                                ),
+                                                            foregroundColor:
+                                                                Colors.white,
+                                                            shape: RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius.circular(
+                                                                    10,
+                                                                  ),
+                                                            ),
+                                                          ),
+                                                          onPressed: () =>
+                                                              Navigator.pop(
+                                                                ctx,
+                                                              ),
+                                                          child: const Text(
+                                                            'OK',
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  );
+                                                  return;
+                                                }
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (_) =>
+                                                        AfterJoinEventPage(
+                                                          event: event,
+                                                        ),
+                                                  ),
+                                                );
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: baseColor
+                                                    .withAlpha(230),
+                                              ),
+                                              child: const Text(
+                                                'Join',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+
+                        SizedBox(height: pagePad * 1.6),
+
+                        // ================= SPONSOR =================
+                        Container(
+                          margin: EdgeInsets.only(bottom: pagePad),
+                          padding: EdgeInsets.all(pagePad * 1.1),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withAlpha(220),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    CircleAvatar(
-                                      backgroundColor: baseColor,
-                                      child: Icon(
-                                        iconData,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    SizedBox(height: pagePad * 0.8),
                                     Text(
-                                      event['title'] as String,
+                                      'Sponsor Now',
                                       style: TextStyle(
+                                        fontSize: titleSize * 0.62,
                                         fontWeight: FontWeight.bold,
-                                        fontSize: sectionSize * 0.8,
-                                        color: Colors.white,
+                                        color: Colors.blue,
                                       ),
                                     ),
                                     SizedBox(height: pagePad * 0.4),
                                     Text(
-                                      event['date'] as String,
+                                      'Support our activities and help us grow.',
                                       style: TextStyle(
-                                        color: Colors.white,
+                                        color: Colors.black54,
                                         fontSize: sectionSize * 0.7,
-                                      ),
-                                    ),
-                                    const Spacer(),
-                                    Align(
-                                      alignment: Alignment.bottomRight,
-                                      child: ElevatedButton(
-                                        onPressed: () {
-                                          // Check if user is logged in
-                                          final session = Supabase
-                                              .instance
-                                              .client
-                                              .auth
-                                              .currentSession;
-                                          if (session == null) {
-                                            showDialog(
-                                              context: context,
-                                              builder: (ctx) => AlertDialog(
-                                                title: const Text(
-                                                  'Login Required',
-                                                ),
-                                                content: const Text(
-                                                  'Please login as a donor or member to join this event.',
-                                                ),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () =>
-                                                        Navigator.pop(ctx),
-                                                    child: const Text('OK'),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                            return;
-                                          }
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) =>
-                                                  AfterJoinEventPage(
-                                                    event: event,
-                                                  ),
-                                            ),
-                                          );
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: baseColor.withAlpha(
-                                            230,
-                                          ),
-                                        ),
-                                        child: const Text(
-                                          'Join',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
                                       ),
                                     ),
                                   ],
                                 ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-
-                  SizedBox(height: pagePad * 1.6),
-
-                  // ================= SPONSOR =================
-                  Container(
-                    margin: EdgeInsets.only(bottom: pagePad),
-                    padding: EdgeInsets.all(pagePad * 1.1),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withAlpha(220),
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Sponsor Now',
-                                style: TextStyle(
-                                  fontSize: titleSize * 0.62,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                ),
                               ),
-                              SizedBox(height: pagePad * 0.4),
-                              Text(
-                                'Support our activities and help us grow.',
-                                style: TextStyle(
-                                  color: Colors.black54,
-                                  fontSize: sectionSize * 0.7,
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  foregroundColor: Colors.white,
                                 ),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => SponsorPage(),
+                                    ),
+                                  );
+                                },
+                                child: const Text('Sponsor'),
                               ),
                             ],
                           ),
                         ),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            foregroundColor: Colors.white,
-                          ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => SponsorPage(),
-                              ),
-                            );
-                          },
-                          child: const Text('Sponsor'),
-                        ),
+
+                        SizedBox(height: pagePad * 1.2),
                       ],
                     ),
                   ),
-
-                  SizedBox(height: pagePad * 1.2),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],

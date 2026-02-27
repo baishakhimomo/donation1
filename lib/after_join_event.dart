@@ -119,6 +119,8 @@ class _AfterJoinEventPageState extends State<AfterJoinEventPage> {
       return;
     }
 
+    if (!mounted) return;
+
     // Update local state
     setState(() {
       _event['title'] = updatedTitle;
@@ -148,11 +150,10 @@ class _AfterJoinEventPageState extends State<AfterJoinEventPage> {
     }
 
     _notifyUpdate();
-    if (mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Event details updated.')));
-    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Event details updated.')));
   }
 
   Future<void> _toggleStatus() async {
@@ -220,6 +221,9 @@ class _AfterJoinEventPageState extends State<AfterJoinEventPage> {
         children: [
           Positioned.fill(
             child: Image.asset('assets/backg.png', fit: BoxFit.cover),
+          ),
+          Positioned.fill(
+            child: Container(color: Colors.white.withOpacity(0.35)),
           ),
           SafeArea(
             child: SingleChildScrollView(

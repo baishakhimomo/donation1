@@ -11,9 +11,10 @@ import 'package:donation_app/mem_login.dart';
 import 'package:donation_app/member_form.dart';
 import 'package:donation_app/money_don.dart';
 import 'package:donation_app/notice.dart';
+import 'package:donation_app/notification_page.dart';
 import 'package:donation_app/profile.dart';
+import 'package:donation_app/sponsor_page.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomePage extends StatefulWidget {
@@ -41,14 +42,14 @@ class _HomePageState extends State<HomePage> {
   // Events loaded from Supabase
   List<Map<String, dynamic>> _activeEvents = [];
 
-  // Bell icon: true when there are unseen notices
-  bool _hasUnseenNotices = false;
+  // Bell icon: true when there are unread notifications
+  bool _hasUnreadNotifs = false;
 
   @override
   void initState() {
     super.initState();
     _loadEvents();
-    _checkUnseenNotices();
+    _checkUnreadNotifs();
 
     _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
       if (_pageController.hasClients) {
@@ -496,7 +497,14 @@ class _HomePageState extends State<HomePage> {
                             backgroundColor: Colors.blue,
                             foregroundColor: Colors.white,
                           ),
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => SponsorPage(),
+                              ),
+                            );
+                          },
                           child: const Text('Sponsor'),
                         ),
                       ],
@@ -561,39 +569,29 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Check if there are notices the user hasn't seen yet
-  Future<void> _checkUnseenNotices() async {
+  // Check if there are unread notifications for the current user
+  Future<void> _checkUnreadNotifs() async {
     try {
-      // Get all admin notice IDs from Supabase
-      final noticeRows = await Supabase.instance.client
-          .from('notices')
-          .select('id');
-      final allIds = (noticeRows as List)
-          .map((r) => r['id'].toString())
-          .toSet();
-
-      // Also get active event IDs (with 'event_' prefix to match seen-tracking keys)
-      final eventRows = await Supabase.instance.client
-          .from('events')
-          .select('id')
-          .eq('is_active', true);
-      for (final r in (eventRows as List)) {
-        allIds.add('event_${r['id']}');
+      final uid = Supabase.instance.client.auth.currentUser?.id;
+      if (uid == null) {
+        if (mounted) setState(() => _hasUnreadNotifs = false);
+        return;
       }
 
-      // Get seen IDs from local storage
-      final prefs = await SharedPreferences.getInstance();
-      final seenIds = (prefs.getStringList('seen_notice_ids') ?? []).toSet();
+      final rows = await Supabase.instance.client
+          .from('user_notifications')
+          .select('id')
+          .eq('user_id', uid)
+          .eq('is_read', false);
 
-      // If there are IDs not yet seen, show the dot
-      final hasUnseen = allIds.difference(seenIds).isNotEmpty;
+      final hasUnread = (rows as List).isNotEmpty;
       if (mounted) {
-        setState(() => _hasUnseenNotices = hasUnseen);
+        setState(() => _hasUnreadNotifs = hasUnread);
       }
     } catch (_) {}
   }
 
-  // Bell icon widget with red dot
+  // Bell icon widget with red dot for unread notifications
   Widget _buildBellIcon(BuildContext context) {
     return Stack(
       children: [
@@ -602,14 +600,14 @@ class _HomePageState extends State<HomePage> {
           onPressed: () async {
             await Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const Notice()),
+              MaterialPageRoute(builder: (_) => const NotificationPage()),
             );
-            // After coming back, re-check unseen
-            _checkUnseenNotices();
+            // After coming back, re-check unread
+            _checkUnreadNotifs();
           },
         ),
-        // Red dot — only visible when there are unseen notices
-        if (_hasUnseenNotices)
+        // Red dot — only visible when there are unread notifications
+        if (_hasUnreadNotifs)
           Positioned(
             right: 8,
             top: 8,
@@ -646,12 +644,13 @@ class _HomePageState extends State<HomePage> {
               MaterialPageRoute(builder: (context) => AboutPage()),
             );
             break;
-          // case 'Profile':
-          //   Navigator.push(
-          //     context,
-          //     MaterialPageRoute(builder: (context) => MyProfile()),
-          //   );
-          //   break;
+
+          case 'Profile':
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => MyProfile()),
+            );
+            break;
 
           case 'Login':
             Navigator.push(
@@ -693,14 +692,14 @@ class _HomePageState extends State<HomePage> {
         }
       },
       itemBuilder: (context) {
-        // Customize menu items per page if needed
+        final isLoggedIn = Supabase.instance.client.auth.currentSession != null;
         return [
           const PopupMenuItem(value: 'Notice', child: Text('Notice')),
           const PopupMenuItem(value: 'About Us', child: Text('About Us')),
-
-          // const PopupMenuItem(value: 'Profile', child: Text('Profile')),
+          const PopupMenuItem(value: 'Profile', child: Text('Profile')),
           const PopupMenuItem(value: 'Login', child: Text('Login')),
-          const PopupMenuItem(value: 'Logout', child: Text('Logout')),
+          if (isLoggedIn)
+            const PopupMenuItem(value: 'Logout', child: Text('Logout')),
         ];
       },
     );

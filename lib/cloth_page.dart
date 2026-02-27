@@ -2,6 +2,9 @@ import 'dart:async'; // timer,,futuer dibe
 import 'package:donation_app/mem_login.dart';
 import 'package:donation_app/member_form.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+final _supa = Supabase.instance.client;
 
 class ClothDonation extends StatefulWidget {
   const ClothDonation({super.key});
@@ -428,8 +431,85 @@ class _ClothDonationState extends State<ClothDonation> {
                                             ),
                                           ),
                                         ),
-                                        onPressed: () {
-                                          // TODO submit pickup request
+                                        onPressed: () async {
+                                          // Check login
+                                          final session =
+                                              _supa.auth.currentSession;
+                                          if (session == null) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  "Please login first",
+                                                ),
+                                              ),
+                                            );
+                                            return;
+                                          }
+
+                                          final name = _nameCtrl.text.trim();
+                                          final phone = _phoneCtrl.text.trim();
+                                          final addr = _pickupAddressCtrl.text
+                                              .trim();
+                                          final date = _dateCtrl.text.trim();
+
+                                          if (name.isEmpty ||
+                                              phone.isEmpty ||
+                                              addr.isEmpty ||
+                                              date.isEmpty) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  "Please fill all required fields",
+                                                ),
+                                              ),
+                                            );
+                                            return;
+                                          }
+
+                                          try {
+                                            await _supa
+                                                .from('pickup_requests')
+                                                .insert({
+                                                  'user_id': session.user.id,
+                                                  'donation_type': 'cloth',
+                                                  'full_name': name,
+                                                  'phone': phone,
+                                                  'pickup_address': addr,
+                                                  'preferred_pickup_date': date,
+                                                  'notes': _notesCtrl.text
+                                                      .trim(),
+                                                });
+
+                                            if (!context.mounted) return;
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  "Pickup request submitted!",
+                                                ),
+                                              ),
+                                            );
+
+                                            _nameCtrl.clear();
+                                            _phoneCtrl.clear();
+                                            _pickupAddressCtrl.clear();
+                                            _dateCtrl.clear();
+                                            _notesCtrl.clear();
+                                          } catch (e) {
+                                            if (!context.mounted) return;
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text("Error: $e"),
+                                              ),
+                                            );
+                                          }
                                         },
                                         child: const Text(
                                           "Request Pickup",

@@ -122,12 +122,7 @@ class _DonorLoginState extends State<DonorLogin> {
                           ),
                         ),
                         const Spacer(),
-                        if (w > 360) ...[
-                          _menuItem("Home"),
-                          _menuItem("About Us"),
-                          _menuItem("Events"),
-                          const SizedBox(width: 8),
-                        ],
+
                         IconButton(
                           tooltip: 'Admin Login',
                           onPressed: () {
@@ -142,34 +137,6 @@ class _DonorLoginState extends State<DonorLogin> {
                             Icons.admin_panel_settings,
                             color: Color.fromARGB(255, 30, 111, 168),
                           ),
-                        ),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(
-                              255,
-                              242,
-                              107,
-                              107,
-                            ),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 10,
-                            ),
-                            elevation: 0,
-                          ),
-                          onPressed: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const HomePage(),
-                              ),
-                            );
-                          },
-                          child: const Text("Student Login"),
                         ),
                       ],
                     ),
@@ -392,20 +359,6 @@ class _DonorLoginState extends State<DonorLogin> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  static Widget _menuItem(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: Color(0xFF184B6A),
-        ),
       ),
     );
   }

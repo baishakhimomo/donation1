@@ -1,3 +1,4 @@
+import 'package:donation_app/admin/admin_settings.dart';
 import 'package:donation_app/admin/event_management.dart';
 import 'package:donation_app/admin/notice_manage.dart';
 import 'package:donation_app/home_page.dart';
@@ -355,6 +356,31 @@ class _AdminApprovalPageState extends State<AdminApprovalPage> {
                 ),
                 const Text(
                   "Notices",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AdminSettingsPage(),
+                    ),
+                  ),
+                  icon: const Icon(Icons.settings),
+                  color: Colors.white,
+                ),
+                const Text(
+                  "Settings",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 10,

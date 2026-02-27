@@ -2,6 +2,9 @@ import 'package:donation_app/home_page.dart';
 import 'package:donation_app/mem_login.dart';
 import 'package:flutter/material.dart';
 import 'package:donation_app/authentication/auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+final _supa = Supabase.instance.client;
 
 class MembershipFeePaymentPage extends StatefulWidget {
   final String studentId;
@@ -15,6 +18,36 @@ class MembershipFeePaymentPage extends StatefulWidget {
 class _MembershipFeePaymentPageState extends State<MembershipFeePaymentPage> {
   final _trxIdController = TextEditingController();
   final _paymentMethodController = TextEditingController();
+
+  // Numbers fetched from Supabase
+  String _bkashNumber = '';
+  String _nagadNumber = '';
+  String _displayNumber = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNumbers();
+  }
+
+  Future<void> _loadNumbers() async {
+    try {
+      final rows = await _supa
+          .from('payment_contacts')
+          .select()
+          .eq('context', 'membership');
+      final list = List<Map<String, dynamic>>.from(rows as List);
+      for (final r in list) {
+        final type = r['payment_type'] ?? '';
+        final num = (r['phone_number'] ?? '').toString();
+        if (type == 'bkash') _bkashNumber = num;
+        if (type == 'nagad') _nagadNumber = num;
+      }
+      setState(() {});
+    } catch (e) {
+      debugPrint('load membership numbers error: $e');
+    }
+  }
 
   void submitPayment() async {
     if (_paymentMethodController.text.isEmpty ||
@@ -69,6 +102,11 @@ class _MembershipFeePaymentPageState extends State<MembershipFeePaymentPage> {
     if (selected != null) {
       setState(() {
         _paymentMethodController.text = selected;
+        if (selected == 'bKash') {
+          _displayNumber = _bkashNumber;
+        } else if (selected == 'Nagad') {
+          _displayNumber = _nagadNumber;
+        }
       });
     }
   }
@@ -206,11 +244,15 @@ class _MembershipFeePaymentPageState extends State<MembershipFeePaymentPage> {
                               ),
                               SizedBox(height: 6),
                               Text(
-                                "01XXXXXXXXXX",
+                                _displayNumber.isEmpty
+                                    ? "Select payment method"
+                                    : _displayNumber,
                                 style: TextStyle(
                                   fontSize: 26,
                                   fontWeight: FontWeight.bold,
-                                  color: Color.fromARGB(255, 255, 90, 70),
+                                  color: _displayNumber.isEmpty
+                                      ? Colors.grey
+                                      : Color.fromARGB(255, 255, 90, 70),
                                 ),
                               ),
                             ],

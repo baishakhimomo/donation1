@@ -131,13 +131,6 @@ class _LoginState extends State<Login> {
 
                         const Spacer(),
 
-                        if (w > 360) ...[
-                          _menuItem("Home"),
-                          _menuItem("About Us"),
-                          _menuItem("Events"),
-                          const SizedBox(width: 8),
-                        ],
-
                         // ElevatedButton(
                         //   style: ElevatedButton.styleFrom(
                         //     backgroundColor: const Color(0xFFF26B6B),
@@ -274,7 +267,7 @@ class _LoginState extends State<Login> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
-                                  color: Color(0xFF184B6A),
+                                  color: Color.fromARGB(255, 24, 75, 106),
                                 ),
                               ),
                               const SizedBox(height: 10),
@@ -286,7 +279,12 @@ class _LoginState extends State<Login> {
                                   hintText: "Enter your Student ID",
                                   prefixIcon: const Icon(Icons.badge_outlined),
                                   filled: true,
-                                  fillColor: const Color(0xFFF3F6F9),
+                                  fillColor: const Color.fromARGB(
+                                    255,
+                                    243,
+                                    246,
+                                    249,
+                                  ),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10),
                                     borderSide: BorderSide.none,
@@ -296,6 +294,16 @@ class _LoginState extends State<Login> {
 
                               const SizedBox(height: 12),
 
+                              const Text(
+                                "Password",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color.fromARGB(255, 24, 75, 106),
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+
                               TextField(
                                 controller: _passwordController,
                                 obscureText: true,
@@ -303,7 +311,12 @@ class _LoginState extends State<Login> {
                                   hintText: "Password",
                                   prefixIcon: const Icon(Icons.lock_outline),
                                   filled: true,
-                                  fillColor: const Color(0xFFF3F6F9),
+                                  fillColor: const Color.fromARGB(
+                                    255,
+                                    243,
+                                    246,
+                                    249,
+                                  ),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10),
                                     borderSide: BorderSide.none,
@@ -315,7 +328,12 @@ class _LoginState extends State<Login> {
 
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF1E6FA8),
+                                  backgroundColor: const Color.fromARGB(
+                                    255,
+                                    30,
+                                    111,
+                                    168,
+                                  ),
                                   foregroundColor: Colors.white,
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 14,
@@ -341,14 +359,7 @@ class _LoginState extends State<Login> {
                                       ),
                               ),
 
-                              const SizedBox(height: 10),
-
-                              Center(
-                                child: TextButton(
-                                  onPressed: () {},
-                                  child: const Text("Forgot Password?"),
-                                ),
-                              ),
+                              const SizedBox(height: 12),
 
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -385,20 +396,6 @@ class _LoginState extends State<Login> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  static Widget _menuItem(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: Color(0xFF184B6A),
-        ),
       ),
     );
   }

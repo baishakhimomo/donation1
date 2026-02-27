@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+final _supa = Supabase.instance.client;
 
 class MoneyDonationPage extends StatefulWidget {
   const MoneyDonationPage({super.key});
@@ -13,8 +16,39 @@ class _MoneyDonationPageState extends State<MoneyDonationPage> {
   final _paymentMethodController = TextEditingController();
   final _amountController = TextEditingController();
 
-  //Replace with your real admin number
-  static const String adminPhoneNumber = "01990108343";
+  // Numbers fetched from Supabase
+  String _bkashNumber = '';
+  String _nagadNumber = '';
+  String _adminCallNumber = '';
+
+  // The number shown to user (changes when they pick bKash / Nagad)
+  String _displayNumber = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNumbers();
+  }
+
+  Future<void> _loadNumbers() async {
+    try {
+      final rows = await _supa
+          .from('payment_contacts')
+          .select()
+          .eq('context', 'money_donation');
+      final list = List<Map<String, dynamic>>.from(rows as List);
+      for (final r in list) {
+        final type = r['payment_type'] ?? '';
+        final num = (r['phone_number'] ?? '').toString();
+        if (type == 'bkash') _bkashNumber = num;
+        if (type == 'nagad') _nagadNumber = num;
+        if (type == 'admin_call') _adminCallNumber = num;
+      }
+      setState(() {});
+    } catch (e) {
+      debugPrint('load money numbers error: $e');
+    }
+  }
 
   Future<void> pickPaymentMethod() async {
     final String? selected = await showModalBottomSheet<String>(
@@ -39,12 +73,26 @@ class _MoneyDonationPageState extends State<MoneyDonationPage> {
     );
 
     if (selected != null) {
-      setState(() => _paymentMethodController.text = selected);
+      setState(() {
+        _paymentMethodController.text = selected;
+        // Update the displayed number based on selected method
+        if (selected == 'bKash') {
+          _displayNumber = _bkashNumber;
+        } else if (selected == 'Nagad') {
+          _displayNumber = _nagadNumber;
+        }
+      });
     }
   }
 
   Future<void> _callAdmin() async {
-    final Uri phoneUri = Uri(scheme: 'tel', path: adminPhoneNumber);
+    if (_adminCallNumber.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Admin call number not set yet')),
+      );
+      return;
+    }
+    final Uri phoneUri = Uri(scheme: 'tel', path: _adminCallNumber);
 
     if (await canLaunchUrl(phoneUri)) {
       await launchUrl(phoneUri);
@@ -56,7 +104,7 @@ class _MoneyDonationPageState extends State<MoneyDonationPage> {
     }
   }
 
-  void _submitDonation() {
+  void _submitDonation() async {
     final amount = _amountController.text.trim();
     final method = _paymentMethodController.text.trim();
     final trx = _trxIdController.text.trim();
@@ -68,12 +116,39 @@ class _MoneyDonationPageState extends State<MoneyDonationPage> {
       return;
     }
 
-    // UI-only for now. Later you will insert into Supabase.
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Donation submitted! Awaiting confirmation."),
-      ),
-    );
+    final session = _supa.auth.currentSession;
+    if (session == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Please login first.")));
+      return;
+    }
+
+    try {
+      await _supa.from('money_donations').insert({
+        'user_id': session.user.id,
+        'amount': amount,
+        'payment_method': method,
+        'trx_id': trx,
+      });
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Donation submitted! Awaiting confirmation."),
+        ),
+      );
+
+      _amountController.clear();
+      _paymentMethodController.clear();
+      _trxIdController.clear();
+      setState(() => _displayNumber = '');
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    }
   }
 
   @override
@@ -226,18 +301,22 @@ class _MoneyDonationPageState extends State<MoneyDonationPage> {
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Text(
+                            children: [
+                              const Text(
                                 "Send payment to this number:",
                                 style: TextStyle(fontSize: 16),
                               ),
-                              SizedBox(height: 6),
+                              const SizedBox(height: 6),
                               Text(
-                                adminPhoneNumber,
+                                _displayNumber.isEmpty
+                                    ? "Select payment method"
+                                    : _displayNumber,
                                 style: TextStyle(
                                   fontSize: 26,
                                   fontWeight: FontWeight.bold,
-                                  color: Color.fromARGB(255, 255, 90, 70),
+                                  color: _displayNumber.isEmpty
+                                      ? Colors.grey
+                                      : const Color.fromARGB(255, 255, 90, 70),
                                 ),
                               ),
                             ],

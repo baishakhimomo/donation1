@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:donation_app/validators.dart';
 
 final _supa = Supabase.instance.client;
 
@@ -116,6 +117,21 @@ class _MoneyDonationPageState extends State<MoneyDonationPage> {
       return;
     }
 
+    // Regex validation
+    final errors = <String>[
+      validateAmount(amount) ?? '',
+      validateRequired(method, 'Payment Method') ?? '',
+      validateTrxId(trx) ?? '',
+    ];
+    errors.removeWhere((e) => e.isEmpty);
+
+    if (errors.isNotEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(errors.first)));
+      return;
+    }
+
     final session = _supa.auth.currentSession;
     if (session == null) {
       ScaffoldMessenger.of(
@@ -170,9 +186,7 @@ class _MoneyDonationPageState extends State<MoneyDonationPage> {
           Positioned.fill(
             child: Image.asset("assets/backg.png", fit: BoxFit.cover),
           ),
-          Positioned.fill(
-            child: Container(color: Colors.white.withAlpha(89)),
-          ),
+          Positioned.fill(child: Container(color: Colors.white.withAlpha(89))),
           SafeArea(
             child: Column(
               children: [

@@ -4,6 +4,7 @@ import 'package:donation_app/authentication/auth.dart';
 import 'package:donation_app/donor_signUP.dart';
 import 'package:donation_app/home_page.dart';
 import 'package:donation_app/mem_login.dart';
+import 'package:donation_app/validators.dart';
 import 'package:flutter/material.dart';
 
 class DonorLogin extends StatefulWidget {
@@ -24,8 +25,15 @@ class _DonorLoginState extends State<DonorLogin> {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    // 1) Simple validation
-    if (email.isEmpty || password.isEmpty) {
+    // 1) Regex validation
+    final emailErr = validateEmail(email);
+    if (emailErr != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(emailErr)));
+      return;
+    }
+    if (password.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Please fill all fields")));

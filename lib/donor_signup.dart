@@ -1,6 +1,7 @@
 import 'package:donation_app/donor_login.dart';
 import 'package:donation_app/mem_login.dart';
 import 'package:donation_app/authentication/auth.dart';
+import 'package:donation_app/validators.dart';
 import 'package:flutter/material.dart';
 
 class DonorSignup extends StatefulWidget {
@@ -31,13 +32,23 @@ class _DonorSignupState extends State<DonorSignup> {
     final password = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
 
-    // 1) Basic validation
-    if (name.isEmpty ||
-        phone.isEmpty ||
-        email.isEmpty ||
-        reference.isEmpty ||
-        password.isEmpty ||
-        confirmPassword.isEmpty) {
+    // 1) Regex validation
+    final errors = <String>[
+      validateName(name) ?? '',
+      validatePhone(phone) ?? '',
+      validateEmail(email) ?? '',
+      validatePassword(password) ?? '',
+    ];
+    errors.removeWhere((e) => e.isEmpty);
+
+    if (errors.isNotEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(errors.first)));
+      return;
+    }
+
+    if (reference.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Please fill all fields")));
@@ -108,9 +119,7 @@ class _DonorSignupState extends State<DonorSignup> {
           Positioned.fill(
             child: Image.asset('assets/backg.png', fit: BoxFit.cover),
           ),
-          Positioned.fill(
-            child: Container(color: Colors.white.withAlpha(89)),
-          ),
+          Positioned.fill(child: Container(color: Colors.white.withAlpha(89))),
           SafeArea(
             child: Column(
               children: [

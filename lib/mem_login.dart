@@ -2,6 +2,7 @@ import 'package:donation_app/admin/admin_login.dart';
 import 'package:donation_app/donor_signUP.dart';
 import 'package:donation_app/home_page.dart';
 import 'package:donation_app/member_form.dart';
+import 'package:donation_app/validators.dart';
 import 'package:flutter/material.dart';
 import 'package:donation_app/donor_login.dart';
 import 'package:donation_app/authentication/auth.dart';
@@ -29,6 +30,15 @@ class _LoginState extends State<Login> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please enter Student ID and Password")),
       );
+      return;
+    }
+
+    // Regex: student ID must be at least 7 digits
+    final idErr = validateStudentId(studentId);
+    if (idErr != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(idErr)));
       return;
     }
 

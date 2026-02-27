@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:donation_app/validators.dart';
 
 class BloodPage extends StatefulWidget {
   const BloodPage({super.key});
@@ -160,13 +161,18 @@ class _BloodPageState extends State<BloodPage> {
     }
 
     // Validate fields
-    if (_nameController.text.trim().isEmpty ||
-        _bloodController.text.trim().isEmpty ||
-        _phoneController.text.trim().isEmpty ||
-        _addressController.text.trim().isEmpty) {
+    final errors = <String>[
+      validateName(_nameController.text) ?? '',
+      validateRequired(_bloodController.text, 'Blood Group') ?? '',
+      validatePhone(_phoneController.text) ?? '',
+      validateAddress(_addressController.text) ?? '',
+    ];
+    errors.removeWhere((e) => e.isEmpty);
+
+    if (errors.isNotEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Please fill all fields.')));
+      ).showSnackBar(SnackBar(content: Text(errors.first)));
       return;
     }
 

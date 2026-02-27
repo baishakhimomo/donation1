@@ -1,4 +1,5 @@
 import 'package:donation_app/membership_fee_payment_page.dart';
+import 'package:donation_app/validators.dart';
 import 'package:flutter/material.dart';
 import 'package:donation_app/authentication/auth.dart';
 
@@ -23,6 +24,27 @@ class _MemberFormState extends State<MemberForm> {
   final _confirmPassController = TextEditingController();
 
   void submitForm() async {
+    // --- Regex validation ---
+    final errors = <String>[
+      validateName(_nameController.text) ?? '',
+      validateStudentId(_studentIdController.text) ?? '',
+      validateDepartment(_deptController.text) ?? '',
+      validateBatch(_batchController.text) ?? '',
+      validateEmail(_emailController.text) ?? '',
+      validatePhone(_phoneController.text) ?? '',
+      validateRequired(_genderController.text, 'Gender') ?? '',
+      validateAddress(_addressController.text) ?? '',
+      validatePassword(_passwordController.text) ?? '',
+    ];
+    errors.removeWhere((e) => e.isEmpty);
+
+    if (errors.isNotEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(errors.first)));
+      return;
+    }
+
     if (_passwordController.text != _confirmPassController.text) {
       ScaffoldMessenger.of(
         context,
@@ -190,9 +212,7 @@ class _MemberFormState extends State<MemberForm> {
           Positioned.fill(
             child: Image.asset("assets/backg.png", fit: BoxFit.cover),
           ),
-          Positioned.fill(
-            child: Container(color: Colors.white.withAlpha(89)),
-          ),
+          Positioned.fill(child: Container(color: Colors.white.withAlpha(89))),
           SafeArea(
             child: Column(
               children: [

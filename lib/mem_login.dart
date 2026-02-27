@@ -80,9 +80,7 @@ class _LoginState extends State<Login> {
           ),
 
           // Overlay
-          Positioned.fill(
-            child: Container(color: Colors.white.withOpacity(0.35)),
-          ),
+          Positioned.fill(child: Container(color: Colors.white.withAlpha(89))),
 
           SafeArea(
             child: Column(
@@ -96,11 +94,11 @@ class _LoginState extends State<Login> {
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.92),
+                      color: Colors.white.withAlpha(235),
                       borderRadius: BorderRadius.circular(14),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
+                          color: Colors.black.withAlpha(20),
                           blurRadius: 12,
                           offset: const Offset(0, 6),
                         ),
@@ -224,9 +222,7 @@ class _LoginState extends State<Login> {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                  backgroundColor: Colors.white.withOpacity(
-                                    0.65,
-                                  ),
+                                  backgroundColor: Colors.white.withAlpha(166),
                                 ),
                                 onPressed: () {
                                   Navigator.pushReplacement(
@@ -249,11 +245,11 @@ class _LoginState extends State<Login> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.95),
+                            color: Colors.white.withAlpha(242),
                             borderRadius: BorderRadius.circular(14),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.08),
+                                color: Colors.black.withAlpha(20),
                                 blurRadius: 14,
                                 offset: const Offset(0, 8),
                               ),

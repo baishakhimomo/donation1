@@ -223,7 +223,7 @@ class _AfterJoinEventPageState extends State<AfterJoinEventPage> {
             child: Image.asset('assets/backg.png', fit: BoxFit.cover),
           ),
           Positioned.fill(
-            child: Container(color: Colors.white.withOpacity(0.35)),
+            child: Container(color: Colors.white.withAlpha(89)),
           ),
           SafeArea(
             child: SingleChildScrollView(

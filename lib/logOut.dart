@@ -31,7 +31,8 @@ class LogOutPage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue,
+                      fontStyle: FontStyle.italic,
+                      color: Color.fromARGB(255, 24, 75, 106),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -44,8 +45,7 @@ class LogOutPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
+                  Center(
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.push(
@@ -56,14 +56,19 @@ class LogOutPage extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(255, 232, 93, 54),
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 14,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       child: const Text('Return to Log In'),
                     ),
                   ),
                   const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
+                  Center(
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.push(
@@ -79,7 +84,13 @@ class LogOutPage extends StatelessWidget {
                           228,
                         ),
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 14,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       child: const Text('Go to Home'),
                     ),

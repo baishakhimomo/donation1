@@ -275,19 +275,12 @@ class _MemberFormState extends State<MemberForm> {
                           style: TextStyle(
                             fontSize: 30,
                             fontWeight: FontWeight.w800,
+                            fontStyle: FontStyle.italic,
                             height: 1.1,
-                            color: Color(0xFF184B6A),
+                            color: Color.fromARGB(255, 24, 75, 106),
                           ),
                         ),
-                        SizedBox(height: pagePad * 0.6),
 
-                        Text(
-                          "Fill out the form below to become a member of the Leading University Social Service Club and make a positive impact.",
-                          style: TextStyle(
-                            fontSize: sectionSize * 0.75,
-                            color: const Color.fromARGB(255, 78, 91, 106),
-                          ),
-                        ),
                         SizedBox(height: pagePad),
 
                         // Registration form card
@@ -306,12 +299,14 @@ class _MemberFormState extends State<MemberForm> {
                           ),
                           child: Stack(
                             children: [
-                              Center(
-                                child: Opacity(
-                                  opacity: 0.08,
-                                  child: Image.asset(
-                                    "assets/logo.jpeg",
-                                    width: width * 0.85,
+                              Positioned.fill(
+                                child: Center(
+                                  child: Opacity(
+                                    opacity: 0.08,
+                                    child: Image.asset(
+                                      "assets/logo.jpeg",
+                                      width: width * 0.85,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -323,11 +318,12 @@ class _MemberFormState extends State<MemberForm> {
                                     style: TextStyle(
                                       fontSize: sectionSize,
                                       fontWeight: FontWeight.bold,
+                                      fontStyle: FontStyle.italic,
                                       color: const Color.fromARGB(
                                         255,
-                                        72,
-                                        131,
-                                        198,
+                                        24,
+                                        75,
+                                        106,
                                       ),
                                     ),
                                   ),

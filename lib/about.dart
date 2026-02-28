@@ -46,7 +46,8 @@ class _AboutPageState extends State<AboutPage> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: const Color.fromARGB(255, 55, 71, 79),
+              fontStyle: FontStyle.italic,
+              color: const Color.fromARGB(255, 24, 75, 106),
             ),
           ),
           if (description != null) ...[
@@ -221,7 +222,8 @@ class _AboutPageState extends State<AboutPage> {
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: Colors.blueGrey.shade800,
+                          fontStyle: FontStyle.italic,
+                          color: const Color.fromARGB(255, 24, 75, 106),
                         ),
                       ),
 
@@ -267,7 +269,8 @@ class _AboutPageState extends State<AboutPage> {
                               style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.blueGrey.shade800,
+                                fontStyle: FontStyle.italic,
+                                color: const Color.fromARGB(255, 24, 75, 106),
                               ),
                             ),
                             TextButton(
@@ -371,7 +374,8 @@ class _AboutPageState extends State<AboutPage> {
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: Colors.blueGrey.shade800,
+                          fontStyle: FontStyle.italic,
+                          color: const Color.fromARGB(255, 24, 75, 106),
                         ),
                       ),
 
@@ -411,7 +415,8 @@ class _AboutPageState extends State<AboutPage> {
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: Colors.blueGrey.shade800,
+                          fontStyle: FontStyle.italic,
+                          color: const Color.fromARGB(255, 24, 75, 106),
                         ),
                       ),
 
@@ -448,9 +453,10 @@ class _AboutPageState extends State<AboutPage> {
                             Text(
                               "Contact Us",
                               style: TextStyle(
-                                color: Colors.blueGrey.shade800,
+                                color: const Color.fromARGB(255, 24, 75, 106),
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
+                                fontStyle: FontStyle.italic,
                               ),
                             ),
 

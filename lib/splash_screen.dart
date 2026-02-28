@@ -14,7 +14,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
-    Future.delayed(const Duration(seconds: 4), () {
+    Future.delayed(const Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomePage()),
@@ -42,8 +42,8 @@ class _SplashScreenState extends State<SplashScreen> {
                   "LUSSC",
                   style: TextStyle(
                     fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                    color: const Color.fromARGB(255, 55, 71, 79),
+                    fontWeight: FontWeight.w800,
+                    color: Color.fromARGB(255, 24, 75, 106),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -55,7 +55,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     fontWeight: FontWeight.w600,
                     height: 1.25,
                     letterSpacing: 0.2,
-                    color: const Color.fromARGB(255, 38, 50, 56),
+                    color: Color.fromARGB(255, 24, 75, 106),
                     shadows: [
                       Shadow(
                         color: Colors.white.withAlpha(160),
@@ -74,7 +74,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     fontWeight: FontWeight.w500,
                     height: 1.25,
                     letterSpacing: 0.15,
-                    color: const Color.fromARGB(255, 55, 71, 79),
+                    color: Color.fromARGB(255, 24, 75, 106),
                     shadows: [
                       Shadow(
                         color: Colors.white.withAlpha(150),

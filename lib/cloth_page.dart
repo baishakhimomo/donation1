@@ -55,7 +55,7 @@ class _ClothDonationState extends State<ClothDonation> {
   final _addressCtrl = TextEditingController();
   final _contactCtrl = TextEditingController();
 
-  // ✅ NEW controllers for the new pickup form design
+  // NEW controllers for the new pickup form design
   final _phoneCtrl = TextEditingController();
   final _pickupAddressCtrl = TextEditingController();
   final _dateCtrl = TextEditingController();
@@ -80,60 +80,6 @@ class _ClothDonationState extends State<ClothDonation> {
 
   static const primaryBlue = Color(0xFF1E5FA8);
   static const deepBlue = Color(0xFF0E3F7A);
-
-  // ✅✅✅ MENU BUTTON (PopupMenu)
-  Widget buildMenu(BuildContext context) {
-    return PopupMenuButton<String>(
-      icon: const Icon(Icons.menu, color: primaryBlue),
-      offset: const Offset(0, 40),
-      color: Colors.white,
-      onSelected: (value) {
-        switch (value) {
-          // case 'Signup':
-          //   Navigator.push(
-          //     context,
-          //     MaterialPageRoute(builder: (context) => Signup()),
-          //   );
-          //   break;
-
-          case 'Login':
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => Login()),
-            );
-            break;
-
-          case 'Logout':
-            debugPrint("Logged out");
-            break;
-
-          case 'Blood Donation':
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => MemberForm()),
-            );
-            break;
-
-          case 'Cloth Donation':
-            break;
-        }
-      },
-      itemBuilder: (context) {
-        return const [
-          PopupMenuItem(value: 'About Us', child: Text('About Us')),
-          PopupMenuItem(value: 'Profile', child: Text('Profile')),
-          // PopupMenuItem(value: 'Signup', child: Text('Signup')),
-          PopupMenuItem(value: 'Login', child: Text('Login')),
-          PopupMenuItem(value: 'Logout', child: Text('Logout')),
-          PopupMenuDivider(),
-          PopupMenuItem(value: 'Blood Donation', child: Text('Blood Donation')),
-          PopupMenuItem(value: 'Cloth Donation', child: Text('Cloth Donation')),
-          PopupMenuItem(value: 'Money Donation', child: Text('Money Donation')),
-          PopupMenuItem(value: 'Food Donation', child: Text('Food Donation')),
-        ];
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -199,8 +145,6 @@ class _ClothDonationState extends State<ClothDonation> {
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
-                            const Spacer(),
-                            buildMenu(context),
                           ],
                         ),
                       ),
@@ -273,7 +217,8 @@ class _ClothDonationState extends State<ClothDonation> {
                           style: TextStyle(
                             fontSize: sectionSize,
                             fontWeight: FontWeight.w900,
-                            color: deepBlue,
+                            fontStyle: FontStyle.italic,
+                            color: const Color.fromARGB(255, 24, 75, 106),
                           ),
                         ),
                       ),
@@ -289,7 +234,9 @@ class _ClothDonationState extends State<ClothDonation> {
                         child: const Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _CheckLine(text: "Clean & Usable Clothes Only"),
+                            _CheckLine(
+                              text: "Clean & Usable Clothes are Accepted",
+                            ),
                             SizedBox(height: 10),
                             _CheckLine(
                               text: "Adult / children's Clothing Accepted",
@@ -359,7 +306,13 @@ class _ClothDonationState extends State<ClothDonation> {
                                                 style: TextStyle(
                                                   fontSize: 18,
                                                   fontWeight: FontWeight.w900,
-                                                  color: deepBlue,
+                                                  fontStyle: FontStyle.italic,
+                                                  color: Color.fromARGB(
+                                                    255,
+                                                    24,
+                                                    75,
+                                                    106,
+                                                  ),
                                                 ),
                                               ),
                                               SizedBox(height: 2),
@@ -545,7 +498,8 @@ class _ClothDonationState extends State<ClothDonation> {
                               style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w900,
-                                color: deepBlue,
+                                fontStyle: FontStyle.italic,
+                                color: Color.fromARGB(255, 24, 75, 106),
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -584,7 +538,7 @@ class _ClothDonationState extends State<ClothDonation> {
                                       ),
                                       SizedBox(width: 10),
                                       Text(
-                                        "10 AM — 4 PM",
+                                        "12 PM — 1 PM",
                                         style: TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w700,

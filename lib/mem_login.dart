@@ -192,8 +192,9 @@ class _LoginState extends State<Login> {
                             style: TextStyle(
                               fontSize: 30,
                               fontWeight: FontWeight.w800,
+                              fontStyle: FontStyle.italic,
                               height: 1.1,
-                              color: Color(0xFF184B6A),
+                              color: Color.fromARGB(255, 24, 75, 106),
                             ),
                           ),
                         ),
@@ -273,6 +274,7 @@ class _LoginState extends State<Login> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
+                                  fontStyle: FontStyle.italic,
                                   color: Color.fromARGB(255, 24, 75, 106),
                                 ),
                               ),
@@ -305,6 +307,7 @@ class _LoginState extends State<Login> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
+                                  fontStyle: FontStyle.italic,
                                   color: Color.fromARGB(255, 24, 75, 106),
                                 ),
                               ),

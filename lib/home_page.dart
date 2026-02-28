@@ -286,6 +286,8 @@ class _HomePageState extends State<HomePage> {
                           style: TextStyle(
                             fontSize: titleSize * 0.62,
                             fontWeight: FontWeight.bold,
+                            fontStyle: FontStyle.italic,
+                            color: const Color.fromARGB(255, 24, 75, 106),
                           ),
                         ),
 
@@ -333,6 +335,8 @@ class _HomePageState extends State<HomePage> {
                           style: TextStyle(
                             fontSize: titleSize * 0.62,
                             fontWeight: FontWeight.bold,
+                            fontStyle: FontStyle.italic,
+                            color: const Color.fromARGB(255, 24, 75, 106),
                           ),
                         ),
 
@@ -523,6 +527,7 @@ class _HomePageState extends State<HomePage> {
                                       style: TextStyle(
                                         fontSize: titleSize * 0.62,
                                         fontWeight: FontWeight.bold,
+
                                         color: Colors.blue,
                                       ),
                                     ),
@@ -607,6 +612,7 @@ class _HomePageState extends State<HomePage> {
                 title,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
+                  color: const Color.fromARGB(255, 24, 75, 106),
                   fontSize: MediaQuery.sizeOf(context).width * 0.045,
                 ),
               ),

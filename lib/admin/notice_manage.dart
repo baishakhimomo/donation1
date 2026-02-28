@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // --------------- Notice Type Options ---------------
-// Admin picks one of these when creating a notice.
-// Each has a label, color and icon.
 class NoticeType {
   final String value; // stored in DB
   final String label; // shown in UI
@@ -15,14 +13,8 @@ class NoticeType {
 const List<NoticeType> noticeTypes = [
   NoticeType('meeting', 'Meeting', Colors.indigo, Icons.groups),
   NoticeType('blood_urgent', 'Blood Urgent', Colors.red, Icons.bloodtype),
-  NoticeType(
-    'registration',
-    'Registration',
-    Colors.teal,
-    Icons.app_registration,
-  ),
   NoticeType('announcement', 'Announcement', Colors.deepPurple, Icons.campaign),
-  NoticeType('event', 'Event', Colors.green, Icons.event),
+  // NoticeType('event', 'Event', Colors.green, Icons.event),
   NoticeType('general', 'General', Colors.blueGrey, Icons.info),
 ];
 

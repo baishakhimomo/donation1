@@ -452,12 +452,14 @@ class _BloodPageState extends State<BloodPage> {
                           child: Stack(
                             children: [
                               // Logo watermark
-                              Center(
-                                child: Opacity(
-                                  opacity: 0.08,
-                                  child: Image.asset(
-                                    'assets/logo.jpeg',
-                                    width: width * 0.5,
+                              Positioned.fill(
+                                child: Center(
+                                  child: Opacity(
+                                    opacity: 0.08,
+                                    child: Image.asset(
+                                      'assets/logo.jpeg',
+                                      width: width * 0.5,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -469,11 +471,12 @@ class _BloodPageState extends State<BloodPage> {
                                     style: TextStyle(
                                       fontSize: titleSize,
                                       fontWeight: FontWeight.bold,
+                                      fontStyle: FontStyle.italic,
                                       color: const Color.fromARGB(
                                         255,
-                                        72,
-                                        131,
-                                        198,
+                                        24,
+                                        75,
+                                        106,
                                       ),
                                     ),
                                   ),
@@ -563,7 +566,8 @@ class _BloodPageState extends State<BloodPage> {
                           style: TextStyle(
                             fontSize: titleSize,
                             fontWeight: FontWeight.bold,
-                            color: const Color.fromARGB(255, 78, 91, 106),
+                            fontStyle: FontStyle.italic,
+                            color: const Color.fromARGB(255, 24, 75, 106),
                           ),
                         ),
                         SizedBox(height: pagePad * 0.7),

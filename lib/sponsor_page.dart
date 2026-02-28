@@ -138,8 +138,9 @@ class _SponsorPageState extends State<SponsorPage> {
                         "Become a Sponsor",
                         style: TextStyle(
                           fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue,
+                          fontWeight: FontWeight.w800,
+                          fontStyle: FontStyle.italic,
+                          color: Color.fromARGB(255, 24, 75, 106),
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -159,7 +160,9 @@ class _SponsorPageState extends State<SponsorPage> {
                               "Event Sponsor",
                               style: TextStyle(
                                 fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w800,
+                                fontStyle: FontStyle.italic,
+                                color: Color.fromARGB(255, 24, 75, 106),
                               ),
                             ),
                             const Text("Support a specific event"),
@@ -262,7 +265,7 @@ class _SponsorPageState extends State<SponsorPage> {
                         height: 50,
                         child: ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
+                            backgroundColor: Color.fromARGB(255, 24, 75, 106),
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),

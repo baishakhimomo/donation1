@@ -96,13 +96,6 @@ final List<Map<String, dynamic>> actionTemplates = [
     'icon': Icons.palette,
     'color': const Color.fromARGB(255, 195, 150, 70),
   },
-  {
-    'key': 'Apply for Stall',
-    'title': 'Apply for Stall',
-    'subtitle': 'Book a stall at our event.',
-    'icon': Icons.storefront,
-    'color': const Color.fromARGB(255, 140, 120, 200),
-  },
 ];
 
 // ============ CONVERT SUPABASE ROW → FLUTTER MAP ============
@@ -222,11 +215,10 @@ class _EventManagementPageState extends State<EventManagementPage> {
   ];
 
   static const Map<String, bool> _initialActionStates = {
-    'Donate Food': true,
+    'Donate Food': false,
     'Donate Clothes': false,
     'Donate Money': true,
     'Pay Registration Fee': false,
-    'Apply for Stall': false,
   };
 
   final Map<String, bool> _actionEnabled = Map.from(_initialActionStates);

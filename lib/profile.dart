@@ -87,17 +87,6 @@ class _MyProfileState extends State<MyProfile> {
             child: Image.asset('assets/backg.png', fit: BoxFit.cover),
           ),
 
-          // Watermark logo in center
-          Positioned.fill(
-            child: Align(
-              alignment: Alignment.center,
-              child: Opacity(
-                opacity: 0.08,
-                child: Image.asset('assets/logo.jpeg', width: width * 0.6),
-              ),
-            ),
-          ),
-
           SafeArea(
             child: Column(
               children: [
@@ -236,29 +225,54 @@ class _MyProfileState extends State<MyProfile> {
             borderRadius: BorderRadius.circular(20),
             boxShadow: const [BoxShadow(blurRadius: 10, color: Colors.black26)],
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Stack(
             children: [
-              const Text(
-                'Personal Information',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Positioned.fill(
+                child: Center(
+                  child: Opacity(
+                    opacity: 0.08,
+                    child: Image.asset('assets/logo.jpeg', width: width * 0.5),
+                  ),
+                ),
               ),
-              const SizedBox(height: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Personal Information',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      fontStyle: FontStyle.italic,
+                      color: Color.fromARGB(255, 24, 75, 106),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
 
-              // Show fields based on role
-              if (_role == 'Member') ...[
-                _infoRow(Icons.badge, 'Student ID', _info['student_id']),
-                _infoRow(Icons.person, 'Name', _info['name']),
-                _infoRow(Icons.school, 'Department', _info['department']),
-                _infoRow(Icons.numbers, 'Batch', _info['batch']?.toString()),
-                _infoRow(Icons.email, 'Contact Email', _info['contact_email']),
-              ],
+                  // Show fields based on role
+                  if (_role == 'Member') ...[
+                    _infoRow(Icons.badge, 'Student ID', _info['student_id']),
+                    _infoRow(Icons.person, 'Name', _info['name']),
+                    _infoRow(Icons.school, 'Department', _info['department']),
+                    _infoRow(
+                      Icons.numbers,
+                      'Batch',
+                      _info['batch']?.toString(),
+                    ),
+                    _infoRow(
+                      Icons.email,
+                      'Contact Email',
+                      _info['contact_email'],
+                    ),
+                  ],
 
-              if (_role == 'Donor') ...[
-                _infoRow(Icons.person, 'Name', _info['name']),
-                _infoRow(Icons.phone, 'Phone', _info['phone']),
-                _infoRow(Icons.email, 'Email', _info['email']),
-              ],
+                  if (_role == 'Donor') ...[
+                    _infoRow(Icons.person, 'Name', _info['name']),
+                    _infoRow(Icons.phone, 'Phone', _info['phone']),
+                    _infoRow(Icons.email, 'Email', _info['email']),
+                  ],
+                ],
+              ),
             ],
           ),
         ),

@@ -3,6 +3,7 @@ import 'package:donation_app/admin/event_management.dart';
 import 'package:donation_app/food_page.dart';
 import 'package:donation_app/cloth_page.dart';
 import 'package:donation_app/money_don.dart';
+import 'package:donation_app/event_registration_fee.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 typedef EventUpdateCallback = void Function(Map<String, dynamic> updatedEvent);
@@ -197,6 +198,8 @@ class _AfterJoinEventPageState extends State<AfterJoinEventPage> {
       page = const ClothDonation();
     } else if (lower.contains('money')) {
       page = const MoneyDonationPage();
+    } else if (lower.contains('registration') || lower.contains('fee')) {
+      page = const RegistrationFeePage();
     }
 
     if (page != null) {
@@ -312,6 +315,7 @@ class _AfterJoinEventPageState extends State<AfterJoinEventPage> {
                                 style: const TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
+                                  color: Color.fromARGB(255, 24, 75, 106),
                                 ),
                                 textAlign: TextAlign.center,
                               ),
@@ -321,7 +325,7 @@ class _AfterJoinEventPageState extends State<AfterJoinEventPage> {
                                   date,
                                   style: const TextStyle(
                                     fontSize: 16,
-                                    color: Colors.black54,
+                                    color: Color.fromARGB(137, 0, 0, 0),
                                   ),
                                 ),
                               ],
@@ -340,7 +344,7 @@ class _AfterJoinEventPageState extends State<AfterJoinEventPage> {
                                     const Icon(
                                       Icons.location_on,
                                       size: 18,
-                                      color: Colors.black54,
+                                      color: Color.fromARGB(137, 0, 0, 0),
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
@@ -356,7 +360,9 @@ class _AfterJoinEventPageState extends State<AfterJoinEventPage> {
                               Text(
                                 description,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(color: Colors.black87),
+                                style: const TextStyle(
+                                  color: Color.fromARGB(221, 0, 0, 0),
+                                ),
                               ),
                               const SizedBox(height: 14),
                               Align(

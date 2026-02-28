@@ -5,14 +5,14 @@ import 'package:donation_app/validators.dart';
 
 final _supa = Supabase.instance.client;
 
-class MoneyDonationPage extends StatefulWidget {
-  const MoneyDonationPage({super.key});
+class RegistrationFeePage extends StatefulWidget {
+  const RegistrationFeePage({super.key});
 
   @override
-  State<MoneyDonationPage> createState() => _MoneyDonationPageState();
+  State<RegistrationFeePage> createState() => _RegistrationFeePageState();
 }
 
-class _MoneyDonationPageState extends State<MoneyDonationPage> {
+class _RegistrationFeePageState extends State<RegistrationFeePage> {
   final _trxIdController = TextEditingController();
   final _paymentMethodController = TextEditingController();
   final _amountController = TextEditingController();
@@ -146,13 +146,13 @@ class _MoneyDonationPageState extends State<MoneyDonationPage> {
         'amount': amount,
         'payment_method': method,
         'trx_id': trx,
-        'purpose': 'donation',
+        'purpose': 'registration_fee',
       });
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Donation submitted! Awaiting confirmation."),
+          content: Text("Registration fee submitted! Awaiting confirmation."),
         ),
       );
 
@@ -224,7 +224,7 @@ class _MoneyDonationPageState extends State<MoneyDonationPage> {
                         ),
                         const SizedBox(width: 8),
                         const Text(
-                          "Donate Money",
+                          "Registration Fee",
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w800,

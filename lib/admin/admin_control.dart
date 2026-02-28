@@ -53,7 +53,7 @@ class _AdminSettingsPageState extends State<AdminSettingsPage>
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "Admin Settings",
+          "Control Center",
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color.fromARGB(255, 30, 111, 168),

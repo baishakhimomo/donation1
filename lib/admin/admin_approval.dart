@@ -1,4 +1,4 @@
-import 'package:donation_app/admin/admin_settings.dart';
+import 'package:donation_app/admin/admin_control.dart';
 import 'package:donation_app/admin/event_management.dart';
 import 'package:donation_app/admin/notice_manage.dart';
 import 'package:donation_app/home_page.dart';
@@ -379,11 +379,11 @@ class _AdminApprovalPageState extends State<AdminApprovalPage> {
                       builder: (context) => const AdminSettingsPage(),
                     ),
                   ),
-                  icon: const Icon(Icons.settings),
+                  icon: const Icon(Icons.dashboard),
                   color: Colors.white,
                 ),
                 const Text(
-                  "Settings",
+                  "Control",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 10,

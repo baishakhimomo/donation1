@@ -191,6 +191,11 @@ class _HomePageState extends State<HomePage> {
                     ),
                     child: Row(
                       children: [
+                        if (Navigator.canPop(context))
+                          IconButton(
+                            onPressed: () => Navigator.pop(context),
+                            icon: const Icon(Icons.arrow_back_ios_new),
+                          ),
                         Image.asset(
                           'assets/logo.jpeg',
                           height: 34,

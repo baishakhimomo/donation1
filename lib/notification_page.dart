@@ -124,40 +124,56 @@ class _NotificationPageState extends State<NotificationPage> {
             child: Column(
               children: [
                 // ── Top bar ──
-                Container(
-                  margin: EdgeInsets.all(width * 0.04),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withAlpha(217),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      const SizedBox(width: 4),
-                      Image.asset('assets/logoremove.jpeg', height: 28),
-                      const SizedBox(width: 10),
-                      const Text(
-                        "Notifications",
-                        style: TextStyle(fontWeight: FontWeight.w900),
-                      ),
-                      const Spacer(),
-                      if (_notifications.isNotEmpty)
-                        IconButton(
-                          icon: const Icon(
-                            Icons.delete_sweep,
-                            color: Colors.red,
-                          ),
-                          tooltip: 'Delete All',
-                          onPressed: _deleteAll,
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withAlpha(235),
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(20),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
                         ),
-                    ],
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.arrow_back_ios_new),
+                        ),
+                        Image.asset(
+                          'assets/logo.jpeg',
+                          height: 34,
+                          width: 34,
+                          fit: BoxFit.contain,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Notifications',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const Spacer(),
+                        if (_notifications.isNotEmpty)
+                          IconButton(
+                            icon: const Icon(
+                              Icons.delete_sweep,
+                              color: Colors.red,
+                            ),
+                            tooltip: 'Delete All',
+                            onPressed: _deleteAll,
+                          ),
+                      ],
+                    ),
                   ),
                 ),
 

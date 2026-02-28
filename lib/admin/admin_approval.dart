@@ -300,10 +300,9 @@ class _AdminApprovalPageState extends State<AdminApprovalPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  onPressed: () => Navigator.pushAndRemoveUntil(
+                  onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const HomePage()),
-                    (_) => false,
                   ),
                   icon: const Icon(Icons.home),
                   color: Colors.white,

@@ -222,260 +222,298 @@ class _AfterJoinEventPageState extends State<AfterJoinEventPage> {
           Positioned.fill(
             child: Image.asset('assets/backg.png', fit: BoxFit.cover),
           ),
-          Positioned.fill(
-            child: Container(color: Colors.white.withAlpha(89)),
-          ),
+          Positioned.fill(child: Container(color: Colors.white.withAlpha(89))),
           SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.arrow_back),
-                      ),
-                      const SizedBox(width: 8),
-                      const Expanded(
-                        child: Text(
-                          'Event Details',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      if (widget.onEventUpdated != null) ...[
-                        TextButton.icon(
-                          onPressed: _showEditDialog,
-                          icon: const Icon(Icons.edit, size: 18),
-                          label: const Text('Edit'),
-                        ),
-                        const SizedBox(width: 6),
-                        ElevatedButton.icon(
-                          onPressed: _toggleStatus,
-                          icon: Icon(
-                            _isActive ? Icons.close : Icons.check,
-                            size: 18,
-                          ),
-                          label: Text(_isActive ? 'Close' : 'Activate'),
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withAlpha(230),
-                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white.withAlpha(235),
+                      borderRadius: BorderRadius.circular(14),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withAlpha(30),
-                          blurRadius: 10,
+                          color: Colors.black.withAlpha(20),
+                          blurRadius: 12,
                           offset: const Offset(0, 6),
                         ),
                       ],
                     ),
-                    child: Column(
+                    child: Row(
                       children: [
-                        Text(
-                          title,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.arrow_back_ios_new),
                         ),
-                        if (date.isNotEmpty) ...[
-                          const SizedBox(height: 6),
-                          Text(
-                            date,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.black54,
-                            ),
-                          ),
-                        ],
-                        if (time.isNotEmpty) ...[
-                          const SizedBox(height: 6),
-                          Text(
-                            time,
-                            style: const TextStyle(color: Colors.black54),
-                          ),
-                        ],
-                        if (location.isNotEmpty) ...[
-                          const SizedBox(height: 6),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.location_on,
-                                size: 18,
-                                color: Colors.black54,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                location,
-                                style: const TextStyle(color: Colors.black54),
-                              ),
-                            ],
-                          ),
-                        ],
-                        const SizedBox(height: 10),
-                        Text(
-                          description,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.black87),
+                        Image.asset(
+                          'assets/logo.jpeg',
+                          height: 34,
+                          width: 34,
+                          fit: BoxFit.contain,
                         ),
-                        const SizedBox(height: 14),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: badgeColor.withAlpha(200),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              status,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
+                        const SizedBox(width: 8),
+                        const Expanded(
+                          child: Text(
+                            'Event Details',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
                             ),
                           ),
                         ),
+                        if (widget.onEventUpdated != null) ...[
+                          TextButton.icon(
+                            onPressed: _showEditDialog,
+                            icon: const Icon(Icons.edit, size: 18),
+                            label: const Text('Edit'),
+                          ),
+                          const SizedBox(width: 6),
+                          ElevatedButton.icon(
+                            onPressed: _toggleStatus,
+                            icon: Icon(
+                              _isActive ? Icons.close : Icons.check,
+                              size: 18,
+                            ),
+                            label: Text(_isActive ? 'Close' : 'Activate'),
+                          ),
+                        ],
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Container(
-                    width: double.infinity,
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withAlpha(230),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            CircleAvatar(
-                              backgroundColor: badgeColor.withAlpha(220),
-                              child: Icon(
-                                _event['icon'] as IconData? ?? Icons.event,
-                                color: Colors.white,
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withAlpha(230),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withAlpha(30),
+                                blurRadius: 10,
+                                offset: const Offset(0, 6),
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            const Expanded(
-                              child: Text(
-                                'You can do the following to support this event.',
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              Text(
+                                title,
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Select an action that you want to take for this event.',
-                          style: TextStyle(color: Colors.black54),
-                        ),
-                        const SizedBox(height: 12),
-                        ...actions.map((action) {
-                          final Color actionColor =
-                              action['color'] as Color? ?? Colors.green;
-                          final String actionTitle =
-                              action['title'] as String? ?? '';
-                          return GestureDetector(
-                            onTap: () => _onActionTap(actionTitle),
-                            child: Container(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withAlpha(20),
-                                    blurRadius: 6,
-                                    offset: const Offset(0, 4),
+                              if (date.isNotEmpty) ...[
+                                const SizedBox(height: 6),
+                                Text(
+                                  date,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black54,
                                   ),
-                                ],
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 50,
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      color: actionColor.withAlpha(220),
-                                      borderRadius: BorderRadius.circular(14),
+                                ),
+                              ],
+                              if (time.isNotEmpty) ...[
+                                const SizedBox(height: 6),
+                                Text(
+                                  time,
+                                  style: const TextStyle(color: Colors.black54),
+                                ),
+                              ],
+                              if (location.isNotEmpty) ...[
+                                const SizedBox(height: 6),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.location_on,
+                                      size: 18,
+                                      color: Colors.black54,
                                     ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      location,
+                                      style: const TextStyle(
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                              const SizedBox(height: 10),
+                              Text(
+                                description,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(color: Colors.black87),
+                              ),
+                              const SizedBox(height: 14),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: badgeColor.withAlpha(200),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    status,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withAlpha(230),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundColor: badgeColor.withAlpha(220),
                                     child: Icon(
-                                      action['icon'] as IconData? ?? Icons.help,
+                                      _event['icon'] as IconData? ??
+                                          Icons.event,
                                       color: Colors.white,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                  const Expanded(
+                                    child: Text(
+                                      'You can do the following to support this event.',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              const Text(
+                                'Select an action that you want to take for this event.',
+                                style: TextStyle(color: Colors.black54),
+                              ),
+                              const SizedBox(height: 12),
+                              ...actions.map((action) {
+                                final Color actionColor =
+                                    action['color'] as Color? ?? Colors.green;
+                                final String actionTitle =
+                                    action['title'] as String? ?? '';
+                                return GestureDetector(
+                                  onTap: () => _onActionTap(actionTitle),
+                                  child: Container(
+                                    margin: const EdgeInsets.only(bottom: 12),
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(16),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withAlpha(20),
+                                          blurRadius: 6,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Row(
                                       children: [
-                                        Text(
-                                          action['title'] as String? ?? '',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
+                                        Container(
+                                          width: 50,
+                                          height: 50,
+                                          decoration: BoxDecoration(
+                                            color: actionColor.withAlpha(220),
+                                            borderRadius: BorderRadius.circular(
+                                              14,
+                                            ),
+                                          ),
+                                          child: Icon(
+                                            action['icon'] as IconData? ??
+                                                Icons.help,
+                                            color: Colors.white,
                                           ),
                                         ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          action['subtitle'] as String? ?? '',
-                                          style: const TextStyle(
-                                            color: Colors.black54,
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                action['title'] as String? ??
+                                                    '',
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                action['subtitle'] as String? ??
+                                                    '',
+                                                style: const TextStyle(
+                                                  color: Colors.black54,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        GestureDetector(
+                                          onTap: () =>
+                                              _onActionTap(actionTitle),
+                                          child: CircleAvatar(
+                                            backgroundColor: actionColor
+                                                .withAlpha(220),
+                                            child: const Icon(
+                                              Icons.arrow_forward_ios,
+                                              color: Colors.white,
+                                              size: 16,
+                                            ),
                                           ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                  GestureDetector(
-                                    onTap: () => _onActionTap(actionTitle),
-                                    child: CircleAvatar(
-                                      backgroundColor: actionColor.withAlpha(
-                                        220,
-                                      ),
-                                      child: const Icon(
-                                        Icons.arrow_forward_ios,
-                                        color: Colors.white,
-                                        size: 16,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }),
+                                );
+                              }),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Thank you for supporting the community in need.',
+                          style: TextStyle(color: Colors.black.withAlpha(160)),
+                        ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Thank you for supporting the community in need.',
-                    style: TextStyle(color: Colors.black.withAlpha(160)),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],

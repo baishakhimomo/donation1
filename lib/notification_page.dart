@@ -235,10 +235,12 @@ class _NotificationPageState extends State<NotificationPage> {
     Color iconColor;
     switch (type) {
       case 'payment_received':
+      case 'event_fee_received':
         icon = Icons.check_circle;
         iconColor = Colors.green;
         break;
       case 'payment_failed':
+      case 'event_fee_not_received':
         icon = Icons.cancel;
         iconColor = Colors.red;
         break;

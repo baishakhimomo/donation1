@@ -146,6 +146,7 @@ class _MoneyDonationPageState extends State<MoneyDonationPage> {
         'amount': amount,
         'payment_method': method,
         'trx_id': trx,
+        'donation_type': 'money_donation',
       });
 
       if (!mounted) return;

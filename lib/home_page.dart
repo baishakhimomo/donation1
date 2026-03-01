@@ -756,7 +756,8 @@ class _HomePageState extends State<HomePage> {
         return [
           const PopupMenuItem(value: 'Notice', child: Text('Notice')),
           const PopupMenuItem(value: 'About Us', child: Text('About Us')),
-          const PopupMenuItem(value: 'Profile', child: Text('Profile')),
+          if (isLoggedIn)
+            const PopupMenuItem(value: 'Profile', child: Text('Profile')),
           const PopupMenuItem(value: 'Login', child: Text('Login')),
           if (isLoggedIn)
             const PopupMenuItem(value: 'Logout', child: Text('Logout')),

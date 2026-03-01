@@ -295,103 +295,48 @@ class _AdminApprovalPageState extends State<AdminApprovalPage> {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  onPressed: () => Navigator.push(
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: Colors.white),
+            onSelected: (value) {
+              switch (value) {
+                case 'home':
+                  Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const HomePage()),
-                  ),
-                  icon: const Icon(Icons.home),
-                  color: Colors.white,
-                ),
-                const Text(
-                  "Home",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  onPressed: () => Navigator.push(
+                  );
+                  break;
+                case 'events':
+                  Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => EventManagementPage(),
                     ),
-                  ),
-                  icon: const Icon(Icons.receipt_long),
-                  color: Colors.white,
-                ),
-                const Text(
-                  "Events",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  onPressed: () => Navigator.push(
+                  );
+                  break;
+                case 'notices':
+                  Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => const NoticeManagePage(),
                     ),
-                  ),
-                  icon: const Icon(Icons.campaign),
-                  color: Colors.white,
-                ),
-                const Text(
-                  "Notices",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  onPressed: () => Navigator.push(
+                  );
+                  break;
+                case 'control':
+                  Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => const AdminSettingsPage(),
                     ),
-                  ),
-                  icon: const Icon(Icons.dashboard),
-                  color: Colors.white,
-                ),
-                const Text(
-                  "Control",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
+                  );
+                  break;
+              }
+            },
+            itemBuilder: (context) => const [
+              PopupMenuItem(value: 'home', child: Text('Home')),
+              PopupMenuItem(value: 'events', child: Text('Events')),
+              PopupMenuItem(value: 'notices', child: Text('Notices')),
+              PopupMenuItem(value: 'control', child: Text('Control')),
+            ],
           ),
         ],
       ),

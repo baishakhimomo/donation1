@@ -456,6 +456,7 @@ class _EventManagementPageState extends State<EventManagementPage> {
                   lastDate: DateTime(2030),
                 );
                 if (picked != null) {
+                  if (!mounted) return;
                   final months = [
                     'Jan',
                     'Feb',
@@ -491,6 +492,7 @@ class _EventManagementPageState extends State<EventManagementPage> {
                   initialTime: TimeOfDay.now(),
                 );
                 if (picked != null) {
+                  if (!mounted) return;
                   final hour = picked.hourOfPeriod == 0
                       ? 12
                       : picked.hourOfPeriod;

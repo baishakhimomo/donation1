@@ -4,6 +4,7 @@ import 'package:donation_app/food_page.dart';
 import 'package:donation_app/cloth_page.dart';
 import 'package:donation_app/money_don.dart';
 import 'package:donation_app/event_registration_fee.dart';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 typedef EventUpdateCallback = void Function(Map<String, dynamic> updatedEvent);
@@ -196,10 +197,11 @@ class _AfterJoinEventPageState extends State<AfterJoinEventPage> {
       page = const FoodPage();
     } else if (lower.contains('cloth')) {
       page = const ClothDonation();
+    } else if (lower.contains('registration') || lower.contains('fee')) {
+      final eventTitle = (_event['title'] as String?) ?? '';
+      page = RegistrationFeePage(eventName: eventTitle);
     } else if (lower.contains('money')) {
       page = const MoneyDonationPage();
-    } else if (lower.contains('registration') || lower.contains('fee')) {
-      page = const RegistrationFeePage();
     }
 
     if (page != null) {

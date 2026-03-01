@@ -6,7 +6,9 @@ import 'package:donation_app/validators.dart';
 final _supa = Supabase.instance.client;
 
 class RegistrationFeePage extends StatefulWidget {
-  const RegistrationFeePage({super.key});
+  final String eventName;
+
+  const RegistrationFeePage({super.key, this.eventName = ''});
 
   @override
   State<RegistrationFeePage> createState() => _RegistrationFeePageState();
@@ -146,6 +148,8 @@ class _RegistrationFeePageState extends State<RegistrationFeePage> {
         'amount': amount,
         'payment_method': method,
         'trx_id': trx,
+        'donation_type': 'event_registration_fee',
+        'event_name': widget.eventName,
       });
 
       if (!mounted) return;
@@ -402,7 +406,7 @@ class _RegistrationFeePageState extends State<RegistrationFeePage> {
                                       ),
                                       onPressed: _submitDonation,
                                       child: const Text(
-                                        "Submit Donation",
+                                        "Submit Registration Fee",
                                         style: TextStyle(fontSize: 18),
                                       ),
                                     ),

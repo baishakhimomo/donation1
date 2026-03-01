@@ -3,6 +3,7 @@ import 'package:donation_app/mem_login.dart';
 import 'package:donation_app/member_form.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:donation_app/validators.dart';
 
 final _supa = Supabase.instance.client;
 
@@ -404,17 +405,24 @@ class _ClothDonationState extends State<ClothDonation> {
                                               .trim();
                                           final date = _dateCtrl.text.trim();
 
-                                          if (name.isEmpty ||
-                                              phone.isEmpty ||
-                                              addr.isEmpty ||
-                                              date.isEmpty) {
+                                          final errors = <String>[
+                                            validateName(name) ?? '',
+                                            validatePhone(phone) ?? '',
+                                            validateAddress(addr) ?? '',
+                                            validateRequired(
+                                                  date,
+                                                  'Pickup Date',
+                                                ) ??
+                                                '',
+                                          ];
+                                          errors.removeWhere((e) => e.isEmpty);
+
+                                          if (errors.isNotEmpty) {
                                             ScaffoldMessenger.of(
                                               context,
                                             ).showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                  "Please fill all required fields",
-                                                ),
+                                              SnackBar(
+                                                content: Text(errors.first),
                                               ),
                                             );
                                             return;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:donation_app/validators.dart';
 
 final _supa = Supabase.instance.client;
 
@@ -31,11 +32,19 @@ class _SponsorPageState extends State<SponsorPage> {
   Future<void> _submit() async {
     final name = _nameCtrl.text.trim();
     final email = _emailCtrl.text.trim();
+    final phone = _phoneCtrl.text.trim();
 
-    if (name.isEmpty || email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Name and Email are required")),
-      );
+    final errors = <String>[
+      validateName(name) ?? '',
+      validateEmail(email) ?? '',
+      phone.isNotEmpty ? (validatePhone(phone) ?? '') : '',
+    ];
+    errors.removeWhere((e) => e.isEmpty);
+
+    if (errors.isNotEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(errors.first)));
       return;
     }
 
@@ -47,7 +56,7 @@ class _SponsorPageState extends State<SponsorPage> {
         'user_id': session?.user.id,
         'name': name,
         'email': email,
-        'phone': _phoneCtrl.text.trim(),
+        'phone': phone,
         'company_name': _companyCtrl.text.trim(),
         'message': _messageCtrl.text.trim(),
       });

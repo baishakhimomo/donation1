@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-// --------------- Notice Type Options ---------------
 class NoticeType {
-  final String value; // stored in DB
-  final String label; // shown in UI
+  final String value;
+  final String label;
   final Color color;
   final IconData icon;
   const NoticeType(this.value, this.label, this.color, this.icon);
@@ -14,20 +13,16 @@ const List<NoticeType> noticeTypes = [
   NoticeType('meeting', 'Meeting', Colors.indigo, Icons.groups),
   NoticeType('blood_urgent', 'Blood Urgent', Colors.red, Icons.bloodtype),
   NoticeType('announcement', 'Announcement', Colors.deepPurple, Icons.campaign),
-  // NoticeType('event', 'Event', Colors.green, Icons.event),
   NoticeType('general', 'General', Colors.blueGrey, Icons.info),
 ];
 
 NoticeType getNoticeType(String? value) {
   return noticeTypes.firstWhere(
     (t) => t.value == value,
-    orElse: () => noticeTypes.last, // default = General
+    orElse: () => noticeTypes.last,
   );
 }
 
-// =====================================================
-//  Admin Notice Management Page
-// =====================================================
 class NoticeManagePage extends StatefulWidget {
   const NoticeManagePage({super.key});
 
@@ -45,7 +40,6 @@ class _NoticeManagePageState extends State<NoticeManagePage> {
     _loadNotices();
   }
 
-  // Load all notices from Supabase (newest first)
   Future<void> _loadNotices() async {
     if (!mounted) return;
     setState(() => _loading = true);
@@ -68,218 +62,216 @@ class _NoticeManagePageState extends State<NoticeManagePage> {
     }
   }
 
-  // ---- Show dialog to create or edit a notice ----
   Future<void> _showNoticeDialog({Map<String, dynamic>? existing}) async {
     final titleCtrl = TextEditingController(
-      text: existing?['title'] as String? ?? '',
+      text: existing?['title']?.toString() ?? '',
     );
     final bodyCtrl = TextEditingController(
-      text: existing?['body'] as String? ?? '',
+      text: existing?['body']?.toString() ?? '',
     );
     final linkCtrl = TextEditingController(
-      text: existing?['link'] as String? ?? '',
+      text: existing?['link']?.toString() ?? '',
     );
     final locationCtrl = TextEditingController(
-      text: existing?['location'] as String? ?? '',
+      text: existing?['location']?.toString() ?? '',
     );
     final dateCtrl = TextEditingController(
-      text: existing?['notice_date'] as String? ?? '',
+      text: existing?['notice_date']?.toString() ?? '',
     );
     final timeCtrl = TextEditingController(
-      text: existing?['notice_time'] as String? ?? '',
+      text: existing?['notice_time']?.toString() ?? '',
     );
 
-    // audience: 'club' or 'member'
-    String audience = existing?['audience'] as String? ?? 'club';
-    // notice type
-    String noticeType = existing?['notice_type'] as String? ?? 'general';
+    String audience = existing?['audience']?.toString() ?? 'club';
+    String noticeType = existing?['notice_type']?.toString() ?? 'general';
 
     final saved = await showDialog<bool>(
       context: context,
       builder: (dialogCtx) {
+        final size = MediaQuery.sizeOf(dialogCtx);
         return StatefulBuilder(
           builder: (stfCtx, setDialogState) {
             return AlertDialog(
+              insetPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 24,
+              ),
               title: Text(existing == null ? 'New Notice' : 'Edit Notice'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ---------- Notice Type Dropdown ----------
-                    const Text(
-                      'Notice Type',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    DropdownButtonFormField<String>(
-                      value: noticeType,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
+              content: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: size.width * 0.9,
+                  maxHeight: size.height * 0.7,
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Notice Type',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
                         ),
                       ),
-                      items: noticeTypes.map((t) {
-                        return DropdownMenuItem(
-                          value: t.value,
-                          child: Row(
-                            children: [
-                              Icon(t.icon, size: 18, color: t.color),
-                              const SizedBox(width: 8),
-                              Text(t.label),
-                            ],
+                      const SizedBox(height: 6),
+                      DropdownButtonFormField<String>(
+                        value: noticeType,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                        );
-                      }).toList(),
-                      onChanged: (val) {
-                        if (val != null) setDialogState(() => noticeType = val);
-                      },
-                    ),
-                    const SizedBox(height: 12),
-
-                    // ---------- Title ----------
-                    TextField(
-                      controller: titleCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Title',
-                        hintText: 'Notice title',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    // ---------- Description ----------
-                    TextField(
-                      controller: bodyCtrl,
-                      maxLines: 4,
-                      decoration: const InputDecoration(
-                        labelText: 'Description',
-                        hintText: 'Write the notice details here...',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    // ---------- Location (optional) ----------
-                    TextField(
-                      controller: locationCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Location (optional)',
-                        hintText: 'e.g. Room 201, Main Hall, Online...',
-                        prefixIcon: Icon(Icons.location_on),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    // ---------- Link (optional) ----------
-                    TextField(
-                      controller: linkCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Link (optional)',
-                        hintText: 'Google Meet / Zoom / Facebook post link...',
-                        prefixIcon: Icon(Icons.link),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    // ---------- Date (optional) ----------
-                    TextField(
-                      controller: dateCtrl,
-                      readOnly: true,
-                      decoration: InputDecoration(
-                        labelText: 'Date (optional)',
-                        hintText: 'Pick a date...',
-                        prefixIcon: const Icon(Icons.calendar_today),
-                        suffixIcon: dateCtrl.text.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear, size: 18),
-                                onPressed: () {
-                                  setDialogState(() => dateCtrl.clear());
-                                },
-                              )
-                            : null,
-                      ),
-                      onTap: () async {
-                        final picked = await showDatePicker(
-                          context: dialogCtx,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(2020),
-                          lastDate: DateTime(2030),
-                        );
-                        if (picked != null) {
-                          setDialogState(() {
-                            dateCtrl.text =
-                                '${picked.day}/${picked.month}/${picked.year}';
-                          });
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 10),
-
-                    // ---------- Time (optional) ----------
-                    TextField(
-                      controller: timeCtrl,
-                      readOnly: true,
-                      decoration: InputDecoration(
-                        labelText: 'Time (optional)',
-                        hintText: 'Pick a time...',
-                        prefixIcon: const Icon(Icons.access_time),
-                        suffixIcon: timeCtrl.text.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear, size: 18),
-                                onPressed: () {
-                                  setDialogState(() => timeCtrl.clear());
-                                },
-                              )
-                            : null,
-                      ),
-                      onTap: () async {
-                        final picked = await showTimePicker(
-                          context: dialogCtx,
-                          initialTime: TimeOfDay.now(),
-                        );
-                        if (picked != null) {
-                          setDialogState(() {
-                            timeCtrl.text = picked.format(context);
-                          });
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 14),
-
-                    // ---------- Audience toggle ----------
-                    Row(
-                      children: [
-                        const Text(
-                          'Audience: ',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
                         ),
-                        const SizedBox(width: 8),
-                        ChoiceChip(
-                          label: const Text('Club'),
-                          selected: audience == 'club',
-                          selectedColor: Colors.blue.shade200,
-                          onSelected: (_) {
-                            setDialogState(() => audience = 'club');
-                          },
+                        items: noticeTypes.map((t) {
+                          return DropdownMenuItem(
+                            value: t.value,
+                            child: Row(
+                              children: [
+                                Icon(t.icon, size: 18, color: t.color),
+                                const SizedBox(width: 8),
+                                Text(t.label),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            setDialogState(() => noticeType = val);
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: titleCtrl,
+                        decoration: const InputDecoration(
+                          labelText: 'Title',
+                          hintText: 'Notice title',
                         ),
-                        const SizedBox(width: 8),
-                        ChoiceChip(
-                          label: const Text('Member'),
-                          selected: audience == 'member',
-                          selectedColor: Colors.green.shade200,
-                          onSelected: (_) {
-                            setDialogState(() => audience = 'member');
-                          },
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: bodyCtrl,
+                        maxLines: 4,
+                        decoration: const InputDecoration(
+                          labelText: 'Description',
+                          hintText: 'Write the notice details here...',
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: locationCtrl,
+                        decoration: const InputDecoration(
+                          labelText: 'Location (optional)',
+                          hintText: 'e.g. Room 201, Main Hall, Online...',
+                          prefixIcon: Icon(Icons.location_on),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: linkCtrl,
+                        decoration: const InputDecoration(
+                          labelText: 'Link (optional)',
+                          hintText:
+                              'Google Meet / Zoom / Facebook post link...',
+                          prefixIcon: Icon(Icons.link),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: dateCtrl,
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          labelText: 'Date (optional)',
+                          hintText: 'Pick a date...',
+                          prefixIcon: const Icon(Icons.calendar_today),
+                          suffixIcon: dateCtrl.text.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear, size: 18),
+                                  onPressed: () {
+                                    setDialogState(() => dateCtrl.clear());
+                                  },
+                                )
+                              : null,
+                        ),
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: dialogCtx,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2020),
+                            lastDate: DateTime(2030),
+                          );
+                          if (picked != null) {
+                            if (!stfCtx.mounted) return;
+                            setDialogState(() {
+                              dateCtrl.text =
+                                  '${picked.day}/${picked.month}/${picked.year}';
+                            });
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: timeCtrl,
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          labelText: 'Time (optional)',
+                          hintText: 'Pick a time...',
+                          prefixIcon: const Icon(Icons.access_time),
+                          suffixIcon: timeCtrl.text.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear, size: 18),
+                                  onPressed: () {
+                                    setDialogState(() => timeCtrl.clear());
+                                  },
+                                )
+                              : null,
+                        ),
+                        onTap: () async {
+                          final picked = await showTimePicker(
+                            context: dialogCtx,
+                            initialTime: TimeOfDay.now(),
+                          );
+                          if (picked != null) {
+                            if (!stfCtx.mounted) return;
+                            setDialogState(() {
+                              timeCtrl.text = picked.format(context);
+                            });
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 14),
+                      Row(
+                        children: [
+                          const Text(
+                            'Audience: ',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(width: 8),
+                          ChoiceChip(
+                            label: const Text('Club'),
+                            selected: audience == 'club',
+                            selectedColor: Colors.blue.shade200,
+                            onSelected: (_) {
+                              setDialogState(() => audience = 'club');
+                            },
+                          ),
+                          const SizedBox(width: 8),
+                          ChoiceChip(
+                            label: const Text('Member'),
+                            selected: audience == 'member',
+                            selectedColor: Colors.green.shade200,
+                            onSelected: (_) {
+                              setDialogState(() => audience = 'member');
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
               actions: [
@@ -298,7 +290,6 @@ class _NoticeManagePageState extends State<NoticeManagePage> {
       },
     );
 
-    // Capture values before disposing
     final title = titleCtrl.text.trim();
     final body = bodyCtrl.text.trim();
     final link = linkCtrl.text.trim();
@@ -315,13 +306,11 @@ class _NoticeManagePageState extends State<NoticeManagePage> {
 
     if (saved != true) return;
 
-    // Validate
     if (title.isEmpty || body.isEmpty) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Title and description are required.')),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Title and description are required.')),
+      );
       return;
     }
 
@@ -348,15 +337,13 @@ class _NoticeManagePageState extends State<NoticeManagePage> {
       }
       await _loadNotices();
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
-  // ---- Delete a notice ----
   Future<void> _deleteNotice(Map<String, dynamic> notice) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -385,15 +372,13 @@ class _NoticeManagePageState extends State<NoticeManagePage> {
           .eq('id', notice['id'] as String);
       await _loadNotices();
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
-  // ======================== BUILD ========================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -423,192 +408,65 @@ class _NoticeManagePageState extends State<NoticeManagePage> {
           : ListView.builder(
               padding: const EdgeInsets.all(12),
               itemCount: _notices.length,
-              itemBuilder: (context, index) {
-                final notice = _notices[index];
-                return _noticeCard(notice);
+              itemBuilder: (_, i) {
+                final n = _notices[i];
+                final type = getNoticeType(n['notice_type']?.toString());
+                final title = n['title']?.toString() ?? '';
+                final body = n['body']?.toString() ?? '';
+                final audience = n['audience']?.toString() ?? 'club';
+                final date = n['notice_date']?.toString() ?? '';
+                final time = n['notice_time']?.toString() ?? '';
+                final location = n['location']?.toString() ?? '';
+                final link = n['link']?.toString() ?? '';
+
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(type.icon, color: type.color),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                title,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              tooltip: 'Edit',
+                              icon: const Icon(Icons.edit),
+                              onPressed: () => _showNoticeDialog(existing: n),
+                            ),
+                            IconButton(
+                              tooltip: 'Delete',
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => _deleteNotice(n),
+                            ),
+                          ],
+                        ),
+                        if (body.isNotEmpty) ...[
+                          const SizedBox(height: 6),
+                          Text(body),
+                        ],
+                        const SizedBox(height: 6),
+                        Text('Audience: $audience'),
+                        if (date.isNotEmpty || time.isNotEmpty)
+                          Text('Time: $date $time'),
+                        if (location.isNotEmpty) Text('Location: $location'),
+                        if (link.isNotEmpty) Text('Link: $link'),
+                      ],
+                    ),
+                  ),
+                );
               },
             ),
-    );
-  }
-
-  // ======================== Notice Card ========================
-  Widget _noticeCard(Map<String, dynamic> notice) {
-    final title = notice['title'] as String? ?? '';
-    final body = notice['body'] as String? ?? '';
-    final link = notice['link'] as String? ?? '';
-    final location = notice['location'] as String? ?? '';
-    final audience = notice['audience'] as String? ?? 'club';
-    final createdAt = notice['created_at'] as String? ?? '';
-    // Get notice type info
-    final nType = getNoticeType(notice['notice_type'] as String?);
-
-    // Format date
-    String dateText = '';
-    if (createdAt.isNotEmpty) {
-      final dt = DateTime.tryParse(createdAt);
-      if (dt != null) {
-        final local = dt.toLocal();
-        dateText =
-            '${local.day}/${local.month}/${local.year}  ${local.hour}:${local.minute.toString().padLeft(2, '0')}';
-      }
-    }
-
-    final isClub = audience == 'club';
-    final audColor = isClub ? Colors.blue : Colors.green;
-    final audText = isClub ? 'CLUB' : 'MEMBER';
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Row: notice type tag + audience tag + actions
-            Row(
-              children: [
-                // Notice type tag
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: nType.color,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(nType.icon, size: 14, color: Colors.white),
-                      const SizedBox(width: 4),
-                      Text(
-                        nType.label.toUpperCase(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 6),
-                // Audience tag
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: audColor.withAlpha(40),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: audColor, width: 1),
-                  ),
-                  child: Text(
-                    audText,
-                    style: TextStyle(
-                      color: audColor,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const Spacer(),
-                IconButton(
-                  onPressed: () => _showNoticeDialog(existing: notice),
-                  icon: const Icon(Icons.edit, size: 20),
-                  tooltip: 'Edit',
-                ),
-                IconButton(
-                  onPressed: () => _deleteNotice(notice),
-                  icon: const Icon(Icons.delete, size: 20, color: Colors.red),
-                  tooltip: 'Delete',
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-
-            // Title
-            Text(
-              title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 4),
-
-            // Body
-            Text(
-              body,
-              style: const TextStyle(color: Color.fromARGB(137, 0, 0, 0)),
-            ),
-
-            // Location
-            if (location.isNotEmpty) ...[
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  const Icon(
-                    Icons.location_on,
-                    size: 16,
-                    color: Colors.redAccent,
-                  ),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      location,
-                      style: const TextStyle(
-                        color: Colors.black87,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-
-            // Link
-            if (link.isNotEmpty) ...[
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  const Icon(Icons.link, size: 16, color: Colors.blue),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      link,
-                      style: const TextStyle(
-                        color: Colors.blue,
-                        decoration: TextDecoration.underline,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-
-            // Date
-            if (dateText.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(
-                    Icons.access_time,
-                    size: 14,
-                    color: Colors.black45,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    dateText,
-                    style: const TextStyle(fontSize: 12, color: Colors.black45),
-                  ),
-                ],
-              ),
-            ],
-          ],
-        ),
-      ),
     );
   }
 }

@@ -642,6 +642,10 @@ class _MoneyDonationsTabState extends State<_MoneyDonationsTab> {
       final userId = (don['user_id'] ?? '').toString();
       final trxId = (don['trx_id'] ?? '').toString();
       final amount = (don['amount'] ?? '').toString();
+      final donationType = (don['donation_type'] ?? '').toString();
+      final eventName = (don['event_name'] ?? '').toString();
+      final isEventFee = donationType == 'event_registration_fee';
+      final eName = eventName.isNotEmpty ? eventName : 'Event';
 
       await _supa
           .from('money_donations')
@@ -657,18 +661,24 @@ class _MoneyDonationsTabState extends State<_MoneyDonationsTab> {
         if (status == 'received') {
           await _sendNotification(
             userId: userId,
-            title: 'Payment Received',
-            body:
-                'Your donation of $amount BDT (TrxID: $trxId) has been received. Thank you!',
-            type: 'payment_received',
+            title: isEventFee
+                ? 'Event Registration Fee Received'
+                : 'Payment Received',
+            body: isEventFee
+                ? 'Your registration fee of $amount BDT for "$eName" (TrxID: $trxId) has been received and confirmed. Thank you!'
+                : 'Your donation of $amount BDT (TrxID: $trxId) has been received. Thank you!',
+            type: isEventFee ? 'event_fee_received' : 'payment_received',
           );
         } else if (status == 'not_received') {
           await _sendNotification(
             userId: userId,
-            title: 'Payment Not Received',
-            body:
-                'We could not verify your donation of $amount BDT (TrxID: $trxId). Please contact admin.',
-            type: 'payment_failed',
+            title: isEventFee
+                ? 'Event Registration Fee Not Received'
+                : 'Payment Not Received',
+            body: isEventFee
+                ? 'We could not verify your registration fee of $amount BDT for "$eName" (TrxID: $trxId). Please contact admin.'
+                : 'We could not verify your donation of $amount BDT (TrxID: $trxId). Please contact admin.',
+            type: isEventFee ? 'event_fee_not_received' : 'payment_failed',
           );
         }
       }
@@ -766,8 +776,12 @@ class _MoneyDonationsTabState extends State<_MoneyDonationsTab> {
     final method = (d['payment_method'] ?? '').toString();
     final trxId = (d['trx_id'] ?? '').toString();
     final status = (d['status'] ?? 'pending').toString();
+    final donationType = (d['donation_type'] ?? '').toString();
+    final eventName = (d['event_name'] ?? '').toString();
     final id = d['id'].toString();
     final createdAt = (d['created_at'] ?? '').toString();
+    final isEventFee = donationType == 'event_registration_fee';
+    final typeLabel = isEventFee ? 'Registration Fee' : 'Money Donation';
 
     // Date
     String dateStr = '';
@@ -825,6 +839,8 @@ class _MoneyDonationsTabState extends State<_MoneyDonationsTab> {
               ],
             ),
             const SizedBox(height: 6),
+            Text("Type: $typeLabel"),
+            if (isEventFee && eventName.isNotEmpty) Text("Event: $eventName"),
             Text("Method: $method"),
             Text("TrxID: $trxId"),
             if (dateStr.isNotEmpty) Text("Date: $dateStr"),

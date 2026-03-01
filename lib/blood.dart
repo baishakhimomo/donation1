@@ -471,7 +471,6 @@ class _BloodPageState extends State<BloodPage> {
                                     style: TextStyle(
                                       fontSize: titleSize,
                                       fontWeight: FontWeight.bold,
-                                      fontStyle: FontStyle.italic,
                                       color: const Color.fromARGB(
                                         255,
                                         24,
@@ -566,7 +565,6 @@ class _BloodPageState extends State<BloodPage> {
                           style: TextStyle(
                             fontSize: titleSize,
                             fontWeight: FontWeight.bold,
-                            fontStyle: FontStyle.italic,
                             color: const Color.fromARGB(255, 24, 75, 106),
                           ),
                         ),

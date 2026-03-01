@@ -83,10 +83,7 @@ class _LoginState extends State<Login> {
         children: [
           // Background Image
           Positioned.fill(
-            child: Image.asset(
-              'assets/backg.png', // <-- your background image
-              fit: BoxFit.cover,
-            ),
+            child: Image.asset('assets/backg.png', fit: BoxFit.cover),
           ),
 
           // Overlay
@@ -122,7 +119,7 @@ class _LoginState extends State<Login> {
                         ),
 
                         Image.asset(
-                          'assets/logo.jpeg', // <-- your logo
+                          'assets/logo.jpeg',
                           height: 34,
                           width: 34,
                           fit: BoxFit.contain,
@@ -139,19 +136,6 @@ class _LoginState extends State<Login> {
 
                         const Spacer(),
 
-                        // ElevatedButton(
-                        //   style: ElevatedButton.styleFrom(
-                        //     backgroundColor: const Color(0xFFF26B6B),
-                        //     foregroundColor: Colors.white,
-                        //     shape: RoundedRectangleBorder(
-                        //       borderRadius: BorderRadius.circular(20),
-                        //     ),
-                        //     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                        //     elevation: 0,
-                        //   ),
-                        //   onPressed: () {},
-                        //   child: const Text("Donor Login"),
-                        // ),
                         IconButton(
                           tooltip: 'Admin Login',
                           onPressed: () {
@@ -192,7 +176,8 @@ class _LoginState extends State<Login> {
                             style: TextStyle(
                               fontSize: 30,
                               fontWeight: FontWeight.w800,
-                              fontStyle: FontStyle.italic,
+                              fontStyle: FontStyle.normal,
+
                               height: 1.1,
                               color: Color.fromARGB(255, 24, 75, 106),
                             ),
@@ -274,7 +259,8 @@ class _LoginState extends State<Login> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
-                                  fontStyle: FontStyle.italic,
+                                  fontStyle: FontStyle.normal,
+
                                   color: Color.fromARGB(255, 24, 75, 106),
                                 ),
                               ),
@@ -307,7 +293,8 @@ class _LoginState extends State<Login> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
-                                  fontStyle: FontStyle.italic,
+                                  fontStyle: FontStyle.normal,
+
                                   color: Color.fromARGB(255, 24, 75, 106),
                                 ),
                               ),

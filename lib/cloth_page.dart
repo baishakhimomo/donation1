@@ -217,7 +217,6 @@ class _ClothDonationState extends State<ClothDonation> {
                           style: TextStyle(
                             fontSize: sectionSize,
                             fontWeight: FontWeight.w900,
-                            fontStyle: FontStyle.italic,
                             color: const Color.fromARGB(255, 24, 75, 106),
                           ),
                         ),
@@ -306,7 +305,6 @@ class _ClothDonationState extends State<ClothDonation> {
                                                 style: TextStyle(
                                                   fontSize: 18,
                                                   fontWeight: FontWeight.w900,
-                                                  fontStyle: FontStyle.italic,
                                                   color: Color.fromARGB(
                                                     255,
                                                     24,
@@ -498,7 +496,6 @@ class _ClothDonationState extends State<ClothDonation> {
                               style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w900,
-                                fontStyle: FontStyle.italic,
                                 color: Color.fromARGB(255, 24, 75, 106),
                               ),
                             ),

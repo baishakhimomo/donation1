@@ -31,7 +31,6 @@ class LogOutPage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      fontStyle: FontStyle.italic,
                       color: Color.fromARGB(255, 24, 75, 106),
                     ),
                   ),

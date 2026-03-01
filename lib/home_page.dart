@@ -286,7 +286,8 @@ class _HomePageState extends State<HomePage> {
                           style: TextStyle(
                             fontSize: titleSize * 0.62,
                             fontWeight: FontWeight.bold,
-                            fontStyle: FontStyle.italic,
+                            fontStyle: FontStyle.normal,
+
                             color: const Color.fromARGB(255, 24, 75, 106),
                           ),
                         ),
@@ -335,7 +336,8 @@ class _HomePageState extends State<HomePage> {
                           style: TextStyle(
                             fontSize: titleSize * 0.62,
                             fontWeight: FontWeight.bold,
-                            fontStyle: FontStyle.italic,
+                            fontStyle: FontStyle.normal,
+
                             color: const Color.fromARGB(255, 24, 75, 106),
                           ),
                         ),
@@ -452,8 +454,11 @@ class _HomePageState extends State<HomePage> {
                                                         ElevatedButton(
                                                           style: ElevatedButton.styleFrom(
                                                             backgroundColor:
-                                                                const Color(
-                                                                  0xFF1E6FA8,
+                                                                const Color.fromARGB(
+                                                                  255,
+                                                                  30,
+                                                                  111,
+                                                                  168,
                                                                 ),
                                                             foregroundColor:
                                                                 Colors.white,
@@ -527,6 +532,7 @@ class _HomePageState extends State<HomePage> {
                                       style: TextStyle(
                                         fontSize: titleSize * 0.62,
                                         fontWeight: FontWeight.bold,
+                                        fontStyle: FontStyle.normal,
 
                                         color: Colors.blue,
                                       ),

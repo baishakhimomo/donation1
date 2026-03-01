@@ -146,7 +146,6 @@ class _MoneyDonationPageState extends State<MoneyDonationPage> {
         'amount': amount,
         'payment_method': method,
         'trx_id': trx,
-        'purpose': 'donation',
       });
 
       if (!mounted) return;
@@ -281,7 +280,6 @@ class _MoneyDonationPageState extends State<MoneyDonationPage> {
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
-                                      fontStyle: FontStyle.italic,
                                       color: const Color.fromARGB(
                                         255,
                                         24,
@@ -437,7 +435,6 @@ class _MoneyDonationPageState extends State<MoneyDonationPage> {
                                           style: TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold,
-                                            fontStyle: FontStyle.italic,
                                             color: Color.fromARGB(
                                               255,
                                               24,

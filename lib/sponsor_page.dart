@@ -139,7 +139,6 @@ class _SponsorPageState extends State<SponsorPage> {
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w800,
-                          fontStyle: FontStyle.italic,
                           color: Color.fromARGB(255, 24, 75, 106),
                         ),
                       ),
@@ -154,14 +153,17 @@ class _SponsorPageState extends State<SponsorPage> {
                         ),
                         child: Column(
                           children: [
-                            Image.asset("assets/event.png", height: 80),
+                            const Icon(
+                              Icons.handshake_outlined,
+                              size: 50,
+                              color: Color.fromARGB(255, 24, 75, 106),
+                            ),
                             const SizedBox(height: 10),
                             const Text(
                               "Event Sponsor",
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w800,
-                                fontStyle: FontStyle.italic,
                                 color: Color.fromARGB(255, 24, 75, 106),
                               ),
                             ),
@@ -187,7 +189,7 @@ class _SponsorPageState extends State<SponsorPage> {
                                 SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
-                                    "100% Non-Profit Student Organization",
+                                    "LUSSC is a 100% non-profit student organization",
                                   ),
                                 ),
                               ],
@@ -199,17 +201,28 @@ class _SponsorPageState extends State<SponsorPage> {
                                 SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
-                                    "All Funds Used for Social Welfare",
+                                    "All funds are used for Social Welfare",
                                   ),
                                 ),
                               ],
                             ),
                             SizedBox(height: 6),
                             Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Icon(Icons.check_circle, color: Colors.green),
+                                Padding(
+                                  padding: EdgeInsets.only(top: 2),
+                                  child: Icon(
+                                    Icons.check_circle,
+                                    color: Colors.green,
+                                  ),
+                                ),
                                 SizedBox(width: 6),
-                                Expanded(child: Text("Transparent Fund Usage")),
+                                Expanded(
+                                  child: Text(
+                                    "Sponsor names or logos will be\ndisplayed on event materials\nand digital platforms",
+                                  ),
+                                ),
                               ],
                             ),
                           ],
@@ -217,44 +230,126 @@ class _SponsorPageState extends State<SponsorPage> {
                       ),
                       const SizedBox(height: 20),
 
-                      /// FORM FIELDS
-                      _field(
-                        "Name / Organization",
-                        Icons.person_outline,
-                        _nameCtrl,
+                      /// OUR PREVIOUS SPONSORS
+                      const Text(
+                        "Our Previous Sponsors",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: Color.fromARGB(255, 24, 75, 106),
+                        ),
                       ),
                       const SizedBox(height: 10),
-                      _field(
-                        "Email",
-                        Icons.email_outlined,
-                        _emailCtrl,
-                        keyboard: TextInputType.emailAddress,
-                      ),
-                      const SizedBox(height: 10),
-                      _field(
-                        "Phone (Optional)",
-                        Icons.phone_outlined,
-                        _phoneCtrl,
-                        keyboard: TextInputType.phone,
-                      ),
-                      const SizedBox(height: 10),
-                      _field(
-                        "Company Name (Optional)",
-                        Icons.business_outlined,
-                        _companyCtrl,
-                      ),
-                      const SizedBox(height: 10),
-                      TextField(
-                        controller: _messageCtrl,
-                        maxLines: 3,
-                        decoration: InputDecoration(
-                          labelText: "Message (Optional)",
-                          prefixIcon: const Icon(Icons.message_outlined),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        alignment: WrapAlignment.center,
+                        children: [
+                          _sponsorChip(
+                            "Shapnik Consultancy",
+                            Icons.business,
+                            Colors.indigo,
                           ),
-                          filled: true,
-                          fillColor: Colors.white,
+                          _sponsorChip(
+                            "ARZ International",
+                            Icons.public,
+                            Colors.teal,
+                          ),
+                          _sponsorChip(
+                            "Gaming Station",
+                            Icons.sports_esports,
+                            Colors.deepOrange,
+                          ),
+                          _sponsorChip(
+                            "Insaaf Clothing",
+                            Icons.checkroom,
+                            Colors.purple,
+                          ),
+                          _sponsorChip(
+                            "Crystal Rose Hotel",
+                            Icons.room_service,
+                            Colors.brown,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "...and many more",
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          fontStyle: FontStyle.italic,
+                          color: Colors.blueGrey.shade600,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      /// FORM FIELDS
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(220),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Stack(
+                          children: [
+                            // Watermark in center
+                            Positioned.fill(
+                              child: Center(
+                                child: Icon(
+                                  Icons.volunteer_activism,
+                                  size: 120,
+                                  color: Colors.blueGrey.withAlpha(30),
+                                ),
+                              ),
+                            ),
+                            // Form fields on top
+                            Column(
+                              children: [
+                                _field(
+                                  "Name / Organization",
+                                  Icons.person_outline,
+                                  _nameCtrl,
+                                ),
+                                const SizedBox(height: 10),
+                                _field(
+                                  "Email",
+                                  Icons.email_outlined,
+                                  _emailCtrl,
+                                  keyboard: TextInputType.emailAddress,
+                                ),
+                                const SizedBox(height: 10),
+                                _field(
+                                  "Phone (Optional)",
+                                  Icons.phone_outlined,
+                                  _phoneCtrl,
+                                  keyboard: TextInputType.phone,
+                                ),
+                                const SizedBox(height: 10),
+                                _field(
+                                  "Company Name (Optional)",
+                                  Icons.business_outlined,
+                                  _companyCtrl,
+                                ),
+                                const SizedBox(height: 10),
+                                TextField(
+                                  controller: _messageCtrl,
+                                  maxLines: 3,
+                                  decoration: InputDecoration(
+                                    labelText: "Message (Optional)",
+                                    prefixIcon: const Icon(
+                                      Icons.message_outlined,
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -316,6 +411,32 @@ class _SponsorPageState extends State<SponsorPage> {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         filled: true,
         fillColor: Colors.white,
+      ),
+    );
+  }
+
+  Widget _sponsorChip(String name, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withAlpha(230),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withAlpha(120), width: 0.8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 6),
+          Text(
+            name,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ],
       ),
     );
   }

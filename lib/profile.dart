@@ -243,7 +243,6 @@ class _MyProfileState extends State<MyProfile> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      fontStyle: FontStyle.italic,
                       color: Color.fromARGB(255, 24, 75, 106),
                     ),
                   ),

@@ -42,7 +42,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   "LUSSC",
                   style: TextStyle(
                     fontSize: 40,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w900,
                     color: Color.fromARGB(255, 24, 75, 106),
                   ),
                 ),
@@ -52,7 +52,8 @@ class _SplashScreenState extends State<SplashScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w800,
+
                     height: 1.25,
                     letterSpacing: 0.2,
                     color: Color.fromARGB(255, 24, 75, 106),
@@ -71,7 +72,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w700,
                     height: 1.25,
                     letterSpacing: 0.15,
                     color: Color.fromARGB(255, 24, 75, 106),

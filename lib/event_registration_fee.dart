@@ -146,13 +146,12 @@ class _RegistrationFeePageState extends State<RegistrationFeePage> {
         'amount': amount,
         'payment_method': method,
         'trx_id': trx,
-        'purpose': 'registration_fee',
       });
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Registration fee submitted! Awaiting confirmation."),
+          content: Text("Donation submitted! Awaiting confirmation."),
         ),
       );
 
@@ -261,14 +260,12 @@ class _RegistrationFeePageState extends State<RegistrationFeePage> {
                           child: Stack(
                             children: [
                               // watermark logo
-                              Positioned.fill(
-                                child: Center(
-                                  child: Opacity(
-                                    opacity: 0.07,
-                                    child: Image.asset(
-                                      "assets/logo.jpeg",
-                                      width: width * 0.85,
-                                    ),
+                              Center(
+                                child: Opacity(
+                                  opacity: 0.07,
+                                  child: Image.asset(
+                                    "assets/logo.jpeg",
+                                    width: width * 0.85,
                                   ),
                                 ),
                               ),
@@ -281,7 +278,6 @@ class _RegistrationFeePageState extends State<RegistrationFeePage> {
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
-                                      fontStyle: FontStyle.italic,
                                       color: const Color.fromARGB(
                                         255,
                                         24,
@@ -437,7 +433,6 @@ class _RegistrationFeePageState extends State<RegistrationFeePage> {
                                           style: TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold,
-                                            fontStyle: FontStyle.italic,
                                             color: Color.fromARGB(
                                               255,
                                               24,

@@ -155,7 +155,7 @@ class _NoticeState extends State<Notice> {
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage("assets/background.png"),
+                image: AssetImage("assets/backg.png"),
                 fit: BoxFit.cover,
               ),
             ),

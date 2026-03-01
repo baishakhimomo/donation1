@@ -16,6 +16,7 @@ class _AboutPageState extends State<AboutPage> {
     String title,
     IconData icon, {
     String? description,
+    Color iconColor = const Color.fromARGB(255, 84, 110, 122),
   }) {
     final w = MediaQuery.of(context).size.width;
     final cardWidth = w >= 700 ? 300.0 : (w >= 420 ? (w / 2) - 24 : w - 40);
@@ -38,7 +39,7 @@ class _AboutPageState extends State<AboutPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 26, color: const Color.fromARGB(255, 84, 110, 122)),
+          Icon(icon, size: 26, color: iconColor),
           const SizedBox(height: 6),
           Text(
             title,
@@ -46,7 +47,6 @@ class _AboutPageState extends State<AboutPage> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              fontStyle: FontStyle.italic,
               color: const Color.fromARGB(255, 24, 75, 106),
             ),
           ),
@@ -70,65 +70,93 @@ class _AboutPageState extends State<AboutPage> {
     {
       'icon': Icons.food_bank,
       'title': 'Iftar Sharing',
-      'time': '5:30 PM - 7:30 PM',
-      'cta': 'Join',
       'iconColor': Color.fromARGB(255, 144, 202, 249),
+      'details':
+          'The Iftar Sharing event is organized every Ramadan to bring the community together. '
+          'Volunteers prepare and distribute iftar meals to people in need, including street vendors, '
+          'day laborers, and underprivileged families. The event promotes the spirit of sharing and '
+          'compassion during the holy month, ensuring no one breaks their fast on an empty stomach.',
     },
     {
-      'icon': Icons.emoji_people,
+      'icon': Icons.ac_unit,
       'title': 'Winter Clothes Drive',
-      'time': '',
-      'cta': 'Join',
       'iconColor': Color.fromARGB(255, 129, 199, 132),
+      'details':
+          'The Winter Clothes Drive collects warm clothing such as sweaters, blankets, jackets, '
+          'and shawls from generous donors and distributes them to people living in cold-affected areas. '
+          'Every winter, thousands of underprivileged families struggle to stay warm, and this event aims '
+          'to provide them with essential winter wear to survive the harsh cold season.',
     },
     {
       'icon': Icons.brush,
       'title': 'Art Competition',
-      'time': '10:00 AM - 3:00 PM',
-      'cta': 'Join',
       'iconColor': Color.fromARGB(255, 248, 165, 140),
+      'details':
+          'The Art Competition is a creative event that encourages students and young artists to '
+          'showcase their talents through painting, drawing, and other art forms. Participants compete in '
+          'various categories, and the event aims to foster creativity, cultural expression, and artistic '
+          'skills among the youth while also raising awareness about social issues through art.',
     },
     {
       'icon': Icons.restaurant,
       'title': 'Food Stalls',
-      'time': '11:00 AM - 5:00 PM',
-      'cta': 'Join',
       'iconColor': Color.fromARGB(255, 186, 104, 200),
+      'details':
+          'The Food Stalls event is a fun-filled fundraiser where members set up stalls offering '
+          'delicious homemade food items. All the proceeds from the stalls go towards supporting the '
+          'club\'s charitable activities. It is a great opportunity for members to bond, develop '
+          'entrepreneurial skills, and raise funds for a good cause in a festive atmosphere.',
     },
     {
       'icon': Icons.water_damage,
       'title': 'Flood Relief Program',
-      'time': '',
-      'cta': 'Join',
       'iconColor': Color.fromARGB(255, 79, 195, 247),
+      'details':
+          'The Flood Relief Program is an emergency response initiative that provides essential '
+          'supplies such as food, clean water, medicine, and clothing to flood-affected communities. '
+          'Volunteers work tirelessly to reach remote areas and help displaced families rebuild their '
+          'lives. The program also includes awareness campaigns on flood preparedness and safety measures.',
     },
     {
       'icon': Icons.directions_bike,
       'title': 'Raincoat for Rickshaw Heroes',
-      'time': '9:00 AM',
-      'cta': 'Join',
       'iconColor': Color.fromARGB(255, 144, 164, 174),
+      'details':
+          'The Raincoat for Rickshaw Heroes event provides free raincoats to rickshaw pullers '
+          'who brave the rain every day to earn their livelihood. These hardworking individuals often '
+          'lack basic rain protection, putting their health at risk. By distributing raincoats, the '
+          'club ensures they can continue working safely during the monsoon season with dignity.',
     },
     {
       'icon': Icons.local_hospital,
       'title': 'Health Support for Major Diseases',
-      'time': '9:00 AM - 2:00 PM',
-      'cta': 'Join',
       'iconColor': Color.fromARGB(255, 223, 78, 78),
+      'details':
+          'This program provides financial and medical support to patients suffering from major '
+          'diseases such as cancer, kidney failure, and heart conditions. The club raises funds to help '
+          'cover treatment costs for families who cannot afford expensive medical care. The initiative '
+          'also organizes free health checkup camps and awareness sessions on disease prevention.',
     },
     {
       'icon': Icons.movie,
       'title': 'Film Festival',
-      'time': '6:00 PM - 10:00 PM',
-      'cta': 'Join',
       'iconColor': Color.fromARGB(255, 239, 154, 154),
+      'details':
+          'The Film Festival is a cultural event that screens short films, documentaries, and '
+          'student-made movies focused on social issues and community development. It provides a '
+          'platform for aspiring filmmakers to share their stories while raising awareness about '
+          'important topics like poverty, education, and environmental conservation through cinema.',
     },
     {
       'icon': Icons.park,
       'title': 'Tree Plantation',
-      'time': '7:00 AM - 12:00 PM',
-      'cta': 'Join',
       'iconColor': Color.fromARGB(255, 102, 187, 106),
+      'details':
+          'The Tree Plantation drive is an environmental initiative where volunteers plant '
+          'hundreds of saplings across campuses, parks, and public spaces. The program educates '
+          'participants about the importance of greenery, combating climate change, and preserving '
+          'biodiversity. Each planting event is accompanied by workshops on sustainable living and '
+          'environmental stewardship.',
     },
   ];
 
@@ -221,8 +249,7 @@ class _AboutPageState extends State<AboutPage> {
                         "Mission",
                         style: TextStyle(
                           fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.w800,
                           color: const Color.fromARGB(255, 24, 75, 106),
                         ),
                       ),
@@ -236,6 +263,7 @@ class _AboutPageState extends State<AboutPage> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 15,
+                            fontWeight: FontWeight.w700,
                             color: Colors.blueGrey.shade700,
                           ),
                         ),
@@ -246,13 +274,24 @@ class _AboutPageState extends State<AboutPage> {
                       Wrap(
                         alignment: WrapAlignment.center,
                         children: [
-                          simpleCard(context, "150+ Events", Icons.event),
+                          simpleCard(
+                            context,
+                            "150+ Events",
+                            Icons.event,
+                            iconColor: Colors.orange,
+                          ),
                           simpleCard(
                             context,
                             "200+ Activities",
                             Icons.local_activity,
+                            iconColor: Colors.teal,
                           ),
-                          simpleCard(context, "300+ Members", Icons.people),
+                          simpleCard(
+                            context,
+                            "300+ Members",
+                            Icons.people,
+                            iconColor: Colors.indigo,
+                          ),
                         ],
                       ),
 
@@ -269,7 +308,6 @@ class _AboutPageState extends State<AboutPage> {
                               style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
-                                fontStyle: FontStyle.italic,
                                 color: const Color.fromARGB(255, 24, 75, 106),
                               ),
                             ),
@@ -338,17 +376,68 @@ class _AboutPageState extends State<AboutPage> {
                                                 fontSize: sectionSize * 0.75,
                                               ),
                                             ),
-                                            Text(
-                                              event['time'] as String,
-                                              style: TextStyle(
-                                                fontSize: sectionSize * 0.65,
-                                              ),
-                                            ),
                                           ],
                                         ),
                                       ),
                                       TextButton(
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) => AlertDialog(
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
+                                              ),
+                                              title: Row(
+                                                children: [
+                                                  Icon(
+                                                    iconData,
+                                                    color: color,
+                                                    size: 28,
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  Expanded(
+                                                    child: Text(
+                                                      event['title'] as String,
+                                                      style: const TextStyle(
+                                                        fontSize: 18,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Color.fromARGB(
+                                                          255,
+                                                          24,
+                                                          75,
+                                                          106,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              content: Text(
+                                                event['details'] as String,
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  height: 1.5,
+                                                  color:
+                                                      Colors.blueGrey.shade700,
+                                                ),
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.pop(context),
+                                                  child: Text(
+                                                    'Close',
+                                                    style: TextStyle(
+                                                      color: color,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
                                         style: TextButton.styleFrom(
                                           foregroundColor: color,
                                         ),
@@ -374,7 +463,6 @@ class _AboutPageState extends State<AboutPage> {
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic,
                           color: const Color.fromARGB(255, 24, 75, 106),
                         ),
                       ),
@@ -388,6 +476,7 @@ class _AboutPageState extends State<AboutPage> {
                             context,
                             "Alo School",
                             Icons.school,
+                            iconColor: Colors.green,
                             description:
                                 "The Alo School Project works under the Social Services Club to support children living in orphanages. Its main goal is to provide educational assistance to these children, helping them bridge the knowledge gap between themselves and regular school students. Beyond academics, the project focuses on motivating and inspiring children to explore their potential and prepare them for a better life. Through personalized guidance and support, Alo School aims to create an environment where every child can grow confidently and achieve their dreams.",
                           ),
@@ -395,6 +484,7 @@ class _AboutPageState extends State<AboutPage> {
                             context,
                             "Blood Wing",
                             Icons.favorite,
+                            iconColor: Colors.red,
                             description:
                                 "The Blood Wing Project is committed to saving lives and promoting public health through organized blood donation and vaccination campaigns. The project encourages community members to donate blood regularly, ensuring a steady and safe supply for patients in need. Alongside this, the project conducts vaccination drives to protect vulnerable populations from preventable diseases. By combining awareness, action, and community participation, the Blood Wing Project aims to build a healthier, stronger, and more resilient society.",
                           ),
@@ -402,6 +492,7 @@ class _AboutPageState extends State<AboutPage> {
                             context,
                             "HashiMukh",
                             Icons.sentiment_satisfied,
+                            iconColor: Colors.amber,
                             description:
                                 "The Hashi Mukh Project is dedicated to empowering underprivileged families and improving their quality of life. The project helps families become self-reliant by providing opportunities to earn their own income while offering financial support for essential needs, particularly medical care. By supporting families both financially and socially, Hashi Mukh strives to create a community where every member has a chance to live with dignity, health, and hope.",
                           ),
@@ -415,7 +506,6 @@ class _AboutPageState extends State<AboutPage> {
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic,
                           color: const Color.fromARGB(255, 24, 75, 106),
                         ),
                       ),
@@ -456,7 +546,6 @@ class _AboutPageState extends State<AboutPage> {
                                 color: const Color.fromARGB(255, 24, 75, 106),
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
-                                fontStyle: FontStyle.italic,
                               ),
                             ),
 

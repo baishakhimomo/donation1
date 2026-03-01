@@ -275,7 +275,6 @@ class _MemberFormState extends State<MemberForm> {
                           style: TextStyle(
                             fontSize: 30,
                             fontWeight: FontWeight.w800,
-                            fontStyle: FontStyle.italic,
                             height: 1.1,
                             color: Color.fromARGB(255, 24, 75, 106),
                           ),
@@ -318,7 +317,6 @@ class _MemberFormState extends State<MemberForm> {
                                     style: TextStyle(
                                       fontSize: sectionSize,
                                       fontWeight: FontWeight.bold,
-                                      fontStyle: FontStyle.italic,
                                       color: const Color.fromARGB(
                                         255,
                                         24,

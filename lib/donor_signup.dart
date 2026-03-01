@@ -161,34 +161,6 @@ class _DonorSignupState extends State<DonorSignup> {
                             fontWeight: FontWeight.w800,
                           ),
                         ),
-                        const Spacer(),
-                        if (w > 360) ...[
-                          _menuItem("Home"),
-                          _menuItem("About Us"),
-                          _menuItem("Events"),
-                          const SizedBox(width: 8),
-                        ],
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFF26B6B),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 10,
-                            ),
-                            elevation: 0,
-                          ),
-                          onPressed: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (_) => const Login()),
-                            );
-                          },
-                          child: const Text("Donor Login"),
-                        ),
                       ],
                     ),
                   ),
@@ -210,7 +182,6 @@ class _DonorSignupState extends State<DonorSignup> {
                             style: TextStyle(
                               fontSize: 30,
                               fontWeight: FontWeight.w800,
-                              fontStyle: FontStyle.italic,
                               height: 1.1,
                               color: Color(0xFF184B6A),
                             ),
@@ -362,33 +333,17 @@ class _DonorSignupState extends State<DonorSignup> {
     );
   }
 
-  static Widget _menuItem(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: Color(0xFF184B6A),
-        ),
-      ),
-    );
-  }
-
   static Widget _label(String text) {
     return Text(
       text,
       style: const TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w700,
-        fontStyle: FontStyle.italic,
         color: Color(0xFF184B6A),
       ),
     );
   }
 
-  // ✅ Added obscureText support
   static Widget _input({
     required TextEditingController controller,
     required String hint,

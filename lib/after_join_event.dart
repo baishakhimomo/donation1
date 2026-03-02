@@ -37,6 +37,7 @@ class _AfterJoinEventPageState extends State<AfterJoinEventPage> {
   }
 
   Future<void> _showEditDialog() async {
+    if (!mounted) return;
     final titleCtrl = TextEditingController(
       text: _event['title'] as String? ?? '',
     );
@@ -58,7 +59,7 @@ class _AfterJoinEventPageState extends State<AfterJoinEventPage> {
 
     final shouldSave = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Edit Event'),
         content: SingleChildScrollView(
           child: Column(
@@ -92,11 +93,11 @@ class _AfterJoinEventPageState extends State<AfterJoinEventPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.of(dialogContext).pop(false),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
             child: const Text('Save'),
           ),
         ],
@@ -191,6 +192,7 @@ class _AfterJoinEventPageState extends State<AfterJoinEventPage> {
 
   // Navigate to the matching donation page based on action title
   void _onActionTap(String title) {
+    if (!mounted) return;
     final lower = title.toLowerCase();
     Widget? page;
     if (lower.contains('food')) {

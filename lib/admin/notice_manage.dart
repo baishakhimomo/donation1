@@ -30,6 +30,290 @@ class NoticeManagePage extends StatefulWidget {
   State<NoticeManagePage> createState() => _NoticeManagePageState();
 }
 
+class _NoticeFormData {
+  final String title;
+  final String body;
+  final String link;
+  final String location;
+  final String noticeDate;
+  final String noticeTime;
+  final String audience;
+  final String noticeType;
+
+  const _NoticeFormData({
+    required this.title,
+    required this.body,
+    required this.link,
+    required this.location,
+    required this.noticeDate,
+    required this.noticeTime,
+    required this.audience,
+    required this.noticeType,
+  });
+}
+
+class _NoticeDialog extends StatefulWidget {
+  final Map<String, dynamic>? existing;
+
+  const _NoticeDialog({this.existing});
+
+  @override
+  State<_NoticeDialog> createState() => _NoticeDialogState();
+}
+
+class _NoticeDialogState extends State<_NoticeDialog> {
+  late final TextEditingController _titleCtrl;
+  late final TextEditingController _bodyCtrl;
+  late final TextEditingController _linkCtrl;
+  late final TextEditingController _locationCtrl;
+  late final TextEditingController _dateCtrl;
+  late final TextEditingController _timeCtrl;
+
+  late String _audience;
+  late String _noticeType;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleCtrl = TextEditingController(
+      text: widget.existing?['title']?.toString() ?? '',
+    );
+    _bodyCtrl = TextEditingController(
+      text: widget.existing?['body']?.toString() ?? '',
+    );
+    _linkCtrl = TextEditingController(
+      text: widget.existing?['link']?.toString() ?? '',
+    );
+    _locationCtrl = TextEditingController(
+      text: widget.existing?['location']?.toString() ?? '',
+    );
+    _dateCtrl = TextEditingController(
+      text: widget.existing?['notice_date']?.toString() ?? '',
+    );
+    _timeCtrl = TextEditingController(
+      text: widget.existing?['notice_time']?.toString() ?? '',
+    );
+
+    _audience = widget.existing?['audience']?.toString() ?? 'club';
+    _noticeType = widget.existing?['notice_type']?.toString() ?? 'general';
+  }
+
+  @override
+  void dispose() {
+    _titleCtrl.dispose();
+    _bodyCtrl.dispose();
+    _linkCtrl.dispose();
+    _locationCtrl.dispose();
+    _dateCtrl.dispose();
+    _timeCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    return AlertDialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      title: Text(widget.existing == null ? 'New Notice' : 'Edit Notice'),
+      content: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: size.width * 0.9,
+          maxHeight: size.height * 0.7,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Notice Type',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+              const SizedBox(height: 6),
+              DropdownButtonFormField<String>(
+                value: _noticeType,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                ),
+                items: noticeTypes.map((t) {
+                  return DropdownMenuItem(
+                    value: t.value,
+                    child: Row(
+                      children: [
+                        Icon(t.icon, size: 18, color: t.color),
+                        const SizedBox(width: 8),
+                        Text(t.label),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                onChanged: (val) {
+                  if (val != null) {
+                    setState(() => _noticeType = val);
+                  }
+                },
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _titleCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                  hintText: 'Notice title',
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: _bodyCtrl,
+                maxLines: 4,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  hintText: 'Write the notice details here...',
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: _locationCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Location (optional)',
+                  hintText: 'e.g. Room 201, Main Hall, Online...',
+                  prefixIcon: Icon(Icons.location_on),
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: _linkCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Link (optional)',
+                  hintText: 'Google Meet / Zoom / Facebook post link...',
+                  prefixIcon: Icon(Icons.link),
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: _dateCtrl,
+                readOnly: true,
+                decoration: InputDecoration(
+                  labelText: 'Date (optional)',
+                  hintText: 'Pick a date...',
+                  prefixIcon: const Icon(Icons.calendar_today),
+                  suffixIcon: _dateCtrl.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, size: 18),
+                          onPressed: () {
+                            setState(() => _dateCtrl.clear());
+                          },
+                        )
+                      : null,
+                ),
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime(2030),
+                  );
+                  if (picked != null && mounted) {
+                    setState(() {
+                      _dateCtrl.text =
+                          '${picked.day}/${picked.month}/${picked.year}';
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: _timeCtrl,
+                readOnly: true,
+                decoration: InputDecoration(
+                  labelText: 'Time (optional)',
+                  hintText: 'Pick a time...',
+                  prefixIcon: const Icon(Icons.access_time),
+                  suffixIcon: _timeCtrl.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, size: 18),
+                          onPressed: () {
+                            setState(() => _timeCtrl.clear());
+                          },
+                        )
+                      : null,
+                ),
+                onTap: () async {
+                  final picked = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.now(),
+                  );
+                  if (picked != null && mounted) {
+                    setState(() {
+                      _timeCtrl.text = picked.format(context);
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  const Text(
+                    'Audience: ',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: const Text('Club'),
+                    selected: _audience == 'club',
+                    selectedColor: Colors.blue.shade200,
+                    onSelected: (_) {
+                      setState(() => _audience = 'club');
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: const Text('Member'),
+                    selected: _audience == 'member',
+                    selectedColor: Colors.green.shade200,
+                    onSelected: (_) {
+                      setState(() => _audience = 'member');
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.pop(
+              context,
+              _NoticeFormData(
+                title: _titleCtrl.text,
+                body: _bodyCtrl.text,
+                link: _linkCtrl.text,
+                location: _locationCtrl.text,
+                noticeDate: _dateCtrl.text,
+                noticeTime: _timeCtrl.text,
+                audience: _audience,
+                noticeType: _noticeType,
+              ),
+            );
+          },
+          child: const Text('Save'),
+        ),
+      ],
+    );
+  }
+}
+
 class _NoticeManagePageState extends State<NoticeManagePage> {
   List<Map<String, dynamic>> _notices = [];
   bool _loading = true;
@@ -63,248 +347,21 @@ class _NoticeManagePageState extends State<NoticeManagePage> {
   }
 
   Future<void> _showNoticeDialog({Map<String, dynamic>? existing}) async {
-    final titleCtrl = TextEditingController(
-      text: existing?['title']?.toString() ?? '',
-    );
-    final bodyCtrl = TextEditingController(
-      text: existing?['body']?.toString() ?? '',
-    );
-    final linkCtrl = TextEditingController(
-      text: existing?['link']?.toString() ?? '',
-    );
-    final locationCtrl = TextEditingController(
-      text: existing?['location']?.toString() ?? '',
-    );
-    final dateCtrl = TextEditingController(
-      text: existing?['notice_date']?.toString() ?? '',
-    );
-    final timeCtrl = TextEditingController(
-      text: existing?['notice_time']?.toString() ?? '',
-    );
-
-    String audience = existing?['audience']?.toString() ?? 'club';
-    String noticeType = existing?['notice_type']?.toString() ?? 'general';
-
-    final saved = await showDialog<bool>(
+    final result = await showDialog<_NoticeFormData>(
       context: context,
-      builder: (dialogCtx) {
-        final size = MediaQuery.sizeOf(dialogCtx);
-        return StatefulBuilder(
-          builder: (stfCtx, setDialogState) {
-            return AlertDialog(
-              insetPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 24,
-              ),
-              title: Text(existing == null ? 'New Notice' : 'Edit Notice'),
-              content: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: size.width * 0.9,
-                  maxHeight: size.height * 0.7,
-                ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Notice Type',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      DropdownButtonFormField<String>(
-                        value: noticeType,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 10,
-                          ),
-                        ),
-                        items: noticeTypes.map((t) {
-                          return DropdownMenuItem(
-                            value: t.value,
-                            child: Row(
-                              children: [
-                                Icon(t.icon, size: 18, color: t.color),
-                                const SizedBox(width: 8),
-                                Text(t.label),
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (val) {
-                          if (val != null) {
-                            setDialogState(() => noticeType = val);
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: titleCtrl,
-                        decoration: const InputDecoration(
-                          labelText: 'Title',
-                          hintText: 'Notice title',
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      TextField(
-                        controller: bodyCtrl,
-                        maxLines: 4,
-                        decoration: const InputDecoration(
-                          labelText: 'Description',
-                          hintText: 'Write the notice details here...',
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      TextField(
-                        controller: locationCtrl,
-                        decoration: const InputDecoration(
-                          labelText: 'Location (optional)',
-                          hintText: 'e.g. Room 201, Main Hall, Online...',
-                          prefixIcon: Icon(Icons.location_on),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      TextField(
-                        controller: linkCtrl,
-                        decoration: const InputDecoration(
-                          labelText: 'Link (optional)',
-                          hintText:
-                              'Google Meet / Zoom / Facebook post link...',
-                          prefixIcon: Icon(Icons.link),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      TextField(
-                        controller: dateCtrl,
-                        readOnly: true,
-                        decoration: InputDecoration(
-                          labelText: 'Date (optional)',
-                          hintText: 'Pick a date...',
-                          prefixIcon: const Icon(Icons.calendar_today),
-                          suffixIcon: dateCtrl.text.isNotEmpty
-                              ? IconButton(
-                                  icon: const Icon(Icons.clear, size: 18),
-                                  onPressed: () {
-                                    setDialogState(() => dateCtrl.clear());
-                                  },
-                                )
-                              : null,
-                        ),
-                        onTap: () async {
-                          final picked = await showDatePicker(
-                            context: dialogCtx,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime(2020),
-                            lastDate: DateTime(2030),
-                          );
-                          if (picked != null) {
-                            if (!stfCtx.mounted) return;
-                            setDialogState(() {
-                              dateCtrl.text =
-                                  '${picked.day}/${picked.month}/${picked.year}';
-                            });
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 10),
-                      TextField(
-                        controller: timeCtrl,
-                        readOnly: true,
-                        decoration: InputDecoration(
-                          labelText: 'Time (optional)',
-                          hintText: 'Pick a time...',
-                          prefixIcon: const Icon(Icons.access_time),
-                          suffixIcon: timeCtrl.text.isNotEmpty
-                              ? IconButton(
-                                  icon: const Icon(Icons.clear, size: 18),
-                                  onPressed: () {
-                                    setDialogState(() => timeCtrl.clear());
-                                  },
-                                )
-                              : null,
-                        ),
-                        onTap: () async {
-                          final picked = await showTimePicker(
-                            context: dialogCtx,
-                            initialTime: TimeOfDay.now(),
-                          );
-                          if (picked != null) {
-                            if (!stfCtx.mounted) return;
-                            setDialogState(() {
-                              timeCtrl.text = picked.format(context);
-                            });
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 14),
-                      Row(
-                        children: [
-                          const Text(
-                            'Audience: ',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(width: 8),
-                          ChoiceChip(
-                            label: const Text('Club'),
-                            selected: audience == 'club',
-                            selectedColor: Colors.blue.shade200,
-                            onSelected: (_) {
-                              setDialogState(() => audience = 'club');
-                            },
-                          ),
-                          const SizedBox(width: 8),
-                          ChoiceChip(
-                            label: const Text('Member'),
-                            selected: audience == 'member',
-                            selectedColor: Colors.green.shade200,
-                            onSelected: (_) {
-                              setDialogState(() => audience = 'member');
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(dialogCtx, false),
-                  child: const Text('Cancel'),
-                ),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(dialogCtx, true),
-                  child: const Text('Save'),
-                ),
-              ],
-            );
-          },
-        );
-      },
+      builder: (dialogCtx) => _NoticeDialog(existing: existing),
     );
 
-    final title = titleCtrl.text.trim();
-    final body = bodyCtrl.text.trim();
-    final link = linkCtrl.text.trim();
-    final location = locationCtrl.text.trim();
-    final noticeDate = dateCtrl.text.trim();
-    final noticeTime = timeCtrl.text.trim();
+    if (!mounted || result == null) return;
 
-    titleCtrl.dispose();
-    bodyCtrl.dispose();
-    linkCtrl.dispose();
-    locationCtrl.dispose();
-    dateCtrl.dispose();
-    timeCtrl.dispose();
-
-    if (saved != true) return;
+    final title = result.title.trim();
+    final body = result.body.trim();
+    final link = result.link.trim();
+    final location = result.location.trim();
+    final noticeDate = result.noticeDate.trim();
+    final noticeTime = result.noticeTime.trim();
+    final audience = result.audience;
+    final noticeType = result.noticeType;
 
     if (title.isEmpty || body.isEmpty) {
       if (!mounted) return;
